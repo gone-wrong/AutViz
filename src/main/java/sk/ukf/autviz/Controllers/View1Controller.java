@@ -4,7 +4,6 @@ package sk.ukf.autviz.Controllers;
 import com.fxgraph.cells.AbstractCell;
 import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.ICell;
-import com.fxgraph.layout.AbegoTreeLayout;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.layout.AnchorPane;

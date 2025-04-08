@@ -15,10 +15,8 @@ import sk.ukf.autviz.Models.Transition;
 
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -56,7 +54,7 @@ public class View2Controller implements Initializable {
         stateColumn.setPrefWidth(COLUMN_PREF_WIDTH);
 
         // Vlastný cell factory pre zvýraznenie začiatkových a koncových stavov
-        stateColumn.setCellFactory(column -> new TableCell<TransitionRow, String>() {
+        stateColumn.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
@@ -120,18 +118,18 @@ public class View2Controller implements Initializable {
         double fixedRowHeight = 31;  // prispôsob podľa tvojich potrieb
         double headerHeight = 61;    // nastav hodnotu podľa tvojho vzhľadu
         int numRows = rows.size();
-        System.out.println(numRows);
-        System.out.println(headerHeight + numRows * fixedRowHeight);
+//        System.out.println(numRows);
+//        System.out.println(headerHeight + numRows * fixedRowHeight);
         transition_table.setPrefHeight(headerHeight + numRows * fixedRowHeight);
 
         // Dynamické nastavenie preferovanej šírky – sumár všetkých stĺpcov
         double totalWidth = 15;
         for (TableColumn<TransitionRow, ?> col : transition_table.getColumns()) {
             totalWidth += col.getPrefWidth();
-            System.out.println(col.getPrefWidth());
+//            System.out.println(col.getPrefWidth());
         }
-        System.out.println(totalWidth);
-        transition_table.setPrefWidth(totalWidth);
+//        System.out.println(totalWidth);
+//        transition_table.setPrefWidth(totalWidth);
     }
 
     // Pomocná vnútorná trieda, ktorá reprezentuje jeden riadok prechodovej matice
