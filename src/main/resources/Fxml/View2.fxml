@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+
+<AnchorPane prefHeight="750.0" prefWidth="850.0" stylesheets="@../Styles/View2.css"
+            xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="sk.ukf.autviz.Controllers.View2Controller">
+   <TableView fx:id="transition_table" AnchorPane.leftAnchor="0.0" AnchorPane.topAnchor="0.0"/>
+</AnchorPane>

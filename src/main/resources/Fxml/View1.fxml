@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+
+
+<AnchorPane fx:id="view1_parent" prefHeight="750.0" prefWidth="850.0" stylesheets="@../Styles/View1.css"
+            xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="sk.ukf.autviz.Controllers.View1Controller">
+</AnchorPane>

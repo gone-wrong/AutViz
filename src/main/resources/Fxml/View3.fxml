@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Text?>
+
+<AnchorPane prefHeight="750.0" prefWidth="850.0" stylesheets="@../Styles/View1.css"
+            xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="sk.ukf.autviz.Controllers.View3Controller">
+    <Text layoutX="414.0" layoutY="380.0" strokeType="OUTSIDE" strokeWidth="0.0" text="View3"
+          AnchorPane.bottomAnchor="366.7057291666667" AnchorPane.leftAnchor="414.0"
+          AnchorPane.rightAnchor="413.86328125" AnchorPane.topAnchor="367.05078125" />
+</AnchorPane>
