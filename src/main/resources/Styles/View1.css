@@ -1,0 +1,21 @@
+/* Štýl pre HBox, ktorý bude slúžiť ako horná lišta s tlačidlami */
+.header_hbox {
+    -fx-background-color: #999999;
+
+    -fx-spacing: 50;                     /* medzera medzi tlačidlami */
+    -fx-alignment: center;               /* centrovanie tlačidiel v HBox (horizontálne aj vertikálne) */
+}
+
+/* Štýl pre tlačidlá v HBox */
+.header_hbox Button {
+    -fx-background-color: #132A13;       /* tmavšia farba tlačidla */
+    -fx-text-fill: #FFFFFF;              /* biely text pre dobrý kontrast */
+    -fx-font-size: 14px;                 /* príjemná veľkosť písma */
+    -fx-background-radius: 5;            /* mierne zaoblené rohy */
+    -fx-padding: 8 16 8 16;              /* odsadenie obsahu v tlačidle: hore, vpravo, dole, vľavo */
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 4, 0.0, 0, 2);  /* jemný tieň pre tlačidlá */
+    -fx-cursor: hand;                    /* kurzor ruky pri hover */
+}
+
+.header_hbox Button:hover {
+}

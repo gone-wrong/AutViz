@@ -6,20 +6,31 @@ import com.fxgraph.graph.Graph;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.layout.Region;
-import sk.ukf.autviz.Utils.DirectedEdgeGraphic;
+import sk.ukf.autviz.Models.Transition;
 
 public class DirectedEdge extends AbstractEdge {
 
     private final StringProperty textProperty;
+    private Transition transition;  // Pridaná referencia na modelový prechod
 
-    public DirectedEdge(ICell source, ICell target) {
+    public DirectedEdge(ICell source, ICell target, Transition transition) {
         // Predpokladáme, že DirectedEdge je vždy smerovaná.
         super(source, target);
+        this.transition = transition;
         textProperty = new SimpleStringProperty();
+        textProperty.set(transition.getCharacter());
     }
 
     public StringProperty textProperty() {
         return textProperty;
+    }
+
+    public Transition getTransition() {
+        return transition;
+    }
+
+    public void setTransition(Transition transition) {
+        this.transition = transition;
     }
 
     @Override

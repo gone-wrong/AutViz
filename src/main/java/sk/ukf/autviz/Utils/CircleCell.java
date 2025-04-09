@@ -2,7 +2,7 @@ package sk.ukf.autviz.Utils;
 
 import com.fxgraph.cells.AbstractCell;
 import com.fxgraph.graph.Graph;
-import javafx.geometry.Pos;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -10,6 +10,9 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Polygon;
 import javafx.scene.text.Text;
 import sk.ukf.autviz.Models.State;
+import sk.ukf.autviz.Models.Model;
+
+import java.util.Optional;
 
 public class CircleCell extends AbstractCell {
 
@@ -74,6 +77,21 @@ public class CircleCell extends AbstractCell {
         } else {
             view = basePane;
         }
+
+        view.setOnMouseClicked(event -> {
+            if (Model.getInstance().isEditMode()) {
+                // Zobraz TextInputDialog pre úpravu názvu stavu.
+                TextInputDialog dialog = new TextInputDialog(label.getText());
+                dialog.setTitle("Edit State");
+                dialog.setHeaderText("Uprav názov stavu");
+                dialog.setContentText("Nový názov:");
+                Optional<String> result = dialog.showAndWait();
+                result.ifPresent(newName -> {
+                    label.setText(newName);
+                    state.setStateName(newName);
+                });
+            }
+        });
     }
 
     /**

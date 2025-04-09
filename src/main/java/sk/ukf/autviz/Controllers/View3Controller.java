@@ -24,16 +24,16 @@ public class View3Controller implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         System.out.println("Initializing View3Controller");
         Automata automata = Model.getInstance().getCurrentAutomata();
-        // Vytvor stromovú štruktúru z automatu
+        // vytvorenie stromovej štruktúry z automatu
         StateTreeNode rootNode = buildStateTree(automata);
-        // Vytvor a vykresli graf na základe stromovej štruktúry
+        // vykreslenie grafu na základe stromovej štruktúry
         drawStateTree(rootNode);
     }
 
     private StateTreeNode buildStateTree(Automata automata) {
         List<State> beginStates = new ArrayList<>();
         for (State s : automata.getStates()) {
-            if (s.isStateBegin() != null && s.isStateBegin()) {
+            if (Boolean.TRUE.equals(s.isStateBegin())) {
                 beginStates.add(s);
             }
         }
@@ -44,53 +44,48 @@ public class View3Controller implements Initializable {
             State dummy = new State("root");
             StateTreeNode root = new StateTreeNode(dummy, true);
             for (State s : beginStates) {
-                root.addChild(buildStateTreeRecursive(s, automata, new ArrayList<>(), ""));
+                root.addChild(buildStateTreeRecursive(s, automata, new ArrayList<>(), "", null));
             }
             return root;
         } else {
-            return buildStateTreeRecursive(beginStates.get(0), automata, new ArrayList<>(), "");
+            return buildStateTreeRecursive(beginStates.get(0), automata, new ArrayList<>(), "", null);
         }
     }
 
-    private StateTreeNode buildStateTreeRecursive(State current, Automata automata, List<String> path, String transitionLabel) {
-        // Ak je stav už v ceste, vrátime neprimárny uzol s daným označením
+
+    private StateTreeNode buildStateTreeRecursive(State current, Automata automata, List<String> path, String transitionLabel, Transition transition) {
         if (path.contains(current.getName())) {
-            return new StateTreeNode(current, false, transitionLabel);
+            return new StateTreeNode(current, false, transitionLabel, transition);
         }
-        // Vytvoríme primárny uzol s daným prechodovým označením
-        StateTreeNode node = new StateTreeNode(current, true, transitionLabel);
+        StateTreeNode node = new StateTreeNode(current, true, transitionLabel, transition);
         List<String> newPath = new ArrayList<>(path);
         newPath.add(current.getName());
-
         for (Transition t : automata.getTransitions()) {
             if (t.getStateSource().getName().equals(current.getName())) {
-                // Pre každý prechod zo stavu current získame symbol
-                String symbol = t.getCharacter();
-                // Rekurzívne vytvoríme uzol pre cieľový stav – prechádzame s príslušným prechodovým označením.
-                StateTreeNode childNode = buildStateTreeRecursive(t.getStateDestination(), automata, newPath, symbol);
+                StateTreeNode childNode = buildStateTreeRecursive(t.getStateDestination(), automata, newPath, t.getCharacter(), t);
                 node.addChild(childNode);
             }
         }
         return node;
     }
 
+
+
     private void drawStateTree(StateTreeNode root) {
-        // Inicializuj graf a jeho model
         graph = new Graph();
         graphModel = graph.getModel();
         graph.beginUpdate();
 
-        // Map pre ukladanie vzťahu medzi stavovými uzlami a grafickými bunkami
+        // mapa pre ukladanie vzťahu medzi stavovými uzlami a grafickými bunkami
         Map<StateTreeNode, ICell> mapping = new HashMap<>();
-        // Rekurzívne pridaj uzly a hrany do grafu
+        // pridanie uzlov a hrán do grafu
         addStateTreeNodes(root, mapping);
 
         graph.endUpdate();
 
-        PositionWrapper posWrapper = new PositionWrapper(50); // Začneme s X = 50 (prispôsob si podľa potreby)
+        PositionWrapper posWrapper = new PositionWrapper(50);
         assignTreePositions(root, mapping, 0, posWrapper);
 
-        // Vlož graf do BorderPane, ktorý je kotvený na celú plochu AnchorPane
         BorderPane pane = new BorderPane(graph.getCanvas());
         AnchorPane.setTopAnchor(pane, 0.0);
         AnchorPane.setBottomAnchor(pane, 0.0);
@@ -98,7 +93,6 @@ public class View3Controller implements Initializable {
         AnchorPane.setRightAnchor(pane, 0.0);
         view3_parent.getChildren().add(pane);
 
-        // Voliteľné: Pridaj clipping, ak je potrebné
         Rectangle clip = new Rectangle();
         clip.widthProperty().bind(view3_parent.widthProperty());
         clip.heightProperty().bind(view3_parent.heightProperty());
@@ -118,12 +112,15 @@ public class View3Controller implements Initializable {
         for (StateTreeNode child : node.getChildren()) {
             addStateTreeNodes(child, mapping);
             ICell childCell = mapping.get(child);
-            // Vytvor DirectedEdge so zobrazeným prechodovým symbolom získaným z uzla (transitionLabel)
-            DirectedEdge edge = new DirectedEdge(cell, childCell);
-            edge.textProperty().set(child.getTransitionLabel());
-            graphModel.addEdge(edge);
+            if (child.getTransition() != null) {
+                DirectedEdge edge = new DirectedEdge(cell, childCell, child.getTransition());
+                // aj tex, ktorý sa bude zobrazovať nad edge
+                edge.textProperty().set(child.getTransitionLabel());
+                graphModel.addEdge(edge);
+            }
         }
     }
+
 
     private ICell createCellForNode(StateTreeNode node) {
             State s = node.getState();
@@ -133,7 +130,7 @@ public class View3Controller implements Initializable {
             return new CircleCell(sCopy);
     }
 
-    // Pomocná trieda pre prenos aktuálnej vodorovnej pozície cez rekurziu
+    // pomocná trieda pre prenos aktuálnej vodorovnej pozície cez rekurziu
     private static class PositionWrapper {
         public double value;
         public PositionWrapper(double value) {
@@ -141,31 +138,25 @@ public class View3Controller implements Initializable {
         }
     }
 
-    // Konštanty pre layout – môžeš ich upraviť podľa potreby
-    private static final double HORIZONTAL_SPACING = 150; // Odstup medzi uzlami v horizontálnej rovine
-    private static final double VERTICAL_SPACING = 100;   // Odstup medzi úrovňami (vertikálna vzdialenosť)
+    // konštanty pre layout
+    private static final double HORIZONTAL_SPACING = 150;
+    private static final double VERTICAL_SPACING = 100;
 
-    // Metóda, ktorá rekurzívne priraďuje pozície všetkým uzlom stromu
     private void assignTreePositions(StateTreeNode node, Map<StateTreeNode, ICell> mapping, int level, PositionWrapper posWrapper) {
-        // Získame grafický uzol pre tento StateTreeNode
         ICell cell = mapping.get(node);
 
-        // Ak má uzol deti, rekurzívne ich spracuj
         if (!node.getChildren().isEmpty()) {
             double startX = posWrapper.value;
-            // Pre každé dieťa – zvýš aktuálnu X hodnotu a vyvolej rekurziu s level+1.
             for (StateTreeNode child : node.getChildren()) {
                 assignTreePositions(child, mapping, level + 1, posWrapper);
             }
             double endX = posWrapper.value;
-            // Nastav X pre rodiča ako priemer detí
             double parentX = (startX + endX) / 2.0;
             double parentY = level * VERTICAL_SPACING;
-            // Nastav pozíciu grafického uzla – predpokladáme, že getGraphic(graph) vracia Region, pre ktorú môžeme nastaviť layout
+
             cell.getGraphic(null).setLayoutX(parentX);
             cell.getGraphic(null).setLayoutY(parentY);
         } else {
-            // Pre listové uzly – priradíme súčasnú horizontálnu hodnotu a potom ju posunieme
             double x = posWrapper.value;
             double y = level * VERTICAL_SPACING;
             cell.getGraphic(null).setLayoutX(x);
@@ -173,5 +164,4 @@ public class View3Controller implements Initializable {
             posWrapper.value += HORIZONTAL_SPACING;
         }
     }
-
 }

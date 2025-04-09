@@ -71,6 +71,11 @@ public class ViewFactory {
             throw new RuntimeException(e);
         }
         Stage stage = new Stage();
+        scene.setOnMouseClicked(event -> {
+            System.out.println("Clicked on: " + event.getTarget());
+//            System.out.println("Scene coordinates: " + event.getSceneX() + ", " + event.getSceneY());
+//            System.out.println("Screen coordinates: " + event.getScreenX() + ", " + event.getScreenY());
+        });
         stage.setScene(scene);
         stage.setTitle("Client");
         stage.show();

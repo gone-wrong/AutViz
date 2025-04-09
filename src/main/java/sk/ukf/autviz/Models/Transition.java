@@ -22,4 +22,8 @@ public class Transition {
     public String getCharacter() {
         return Character;
     }
+
+    public void setCharacter(String newCharacter) {
+        this.Character = newCharacter;
+    }
 }

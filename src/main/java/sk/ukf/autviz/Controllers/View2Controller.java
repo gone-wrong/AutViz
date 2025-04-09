@@ -30,30 +30,25 @@ public class View2Controller implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         System.out.println("Initializing View2Controller");
-        // Získaj aktuálny automat z Modelu; ak nie je, vytvor ho
         Automata automata = Model.getInstance().getCurrentAutomata();
         buildTransitionMatrix(automata);
         // transition_table.setEditable(false);
     }
 
     private void buildTransitionMatrix(Automata automata) {
-        // Získaj abecedu a stavy z automatu
-        // Ak chceš zachovať poradie vloženia, nepoužívaj sort()
         List<String> alphabet = new ArrayList<>(automata.getAlphabet());
-        // Ak potrebuješ zoradenie, môžeš použiť Collections.sort(alphabet);
+        // Collections.sort(alphabet);
         List<State> states = new ArrayList<>(automata.getStates());
-        // Ak chceš zoradiť stavy podľa mena, môžeš použiť:
         // states.sort(Comparator.comparing(State::getName));
 
-        // Vyčisti existujúce stĺpce v tabuľke
         transition_table.getColumns().clear();
 
-        // Vytvor prvý stĺpec pre názov stavu
+        // prvý stĺpec pre názov stavu
         TableColumn<TransitionRow, String> stateColumn = new TableColumn<>("State");
         stateColumn.setCellValueFactory(cellData -> cellData.getValue().stateNameProperty());
         stateColumn.setPrefWidth(COLUMN_PREF_WIDTH);
 
-        // Vlastný cell factory pre zvýraznenie začiatkových a koncových stavov
+        // cell factory pre zvýraznenie začiatkových a koncových stavov
         stateColumn.setCellFactory(column -> new TableCell<>() {
             @Override
             protected void updateItem(String item, boolean empty) {
@@ -63,28 +58,24 @@ public class View2Controller implements Initializable {
                     setGraphic(null);
                     setStyle("");
                 } else {
-                    // Získame aktuálny riadok
                     TransitionRow row = getTableView().getItems().get(getIndex());
                     String displayText = item;
                     if (row.isBegin() && row.isEnd()) {
-                        // Ak je stav oboje, napr. pridáme symbol pred a za názov
                         displayText = "► " + item + " ★";
                     } else if (row.isBegin()) {
-                        // Ak je stav len začiatkový, pridáme symbol pred názov
                         displayText = "► " + item;
                     } else if (row.isEnd()) {
-                        // Ak je stav len koncový, pridáme symbol za názov
                         displayText = item + " ★";
                     }
                     setText(displayText);
-                    // Môžeš pridať aj vlastný štýl, ak chceš
+                    // Pridanie css štýlovania
                     setStyle("-fx-font-weight: bold;");
                 }
             }
         });
         transition_table.getColumns().add(stateColumn);
 
-        // Vytvorenie stĺpcov pre každý symbol z abecedy
+        // stĺpce pre každý symbol z abecedy
         for (String symbol : alphabet) {
             TableColumn<TransitionRow, String> symbolCol = new TableColumn<>(symbol);
             symbolCol.setPrefWidth(COLUMN_PREF_WIDTH);
@@ -92,16 +83,13 @@ public class View2Controller implements Initializable {
             transition_table.getColumns().add(symbolCol);
         }
 
-        // Vytvor ObservableList riadkov pre TableView
+        // ObservableList riadkov pre TableView
         ObservableList<TransitionRow> rows = FXCollections.observableArrayList();
         for (State state : states) {
-            // Pre každý stav vytvor TransitionRow s informáciou, či je začiatkový a/alebo koncový
             TransitionRow row = new TransitionRow(state.getName(), state.isStateBegin(), state.isStateEnd());
-            // Pre každý symbol hľadaj prechod zo stavu pre daný symbol
             for (String symbol : alphabet) {
                 String destination = "";
                 for (Transition t : automata.getTransitions()) {
-                    // Ak prechod pochádza zo stavu a vstupný symbol sa nachádza v prechodovom reťazci
                     if (t.getStateSource().getName().equals(state.getName())
                             && t.getCharacter().contains(symbol)) {
                         destination = t.getStateDestination().getName();
@@ -112,17 +100,15 @@ public class View2Controller implements Initializable {
             }
             rows.add(row);
         }
-        // Nastav ObservableList ako zdroj dát pre TableView
         transition_table.setItems(rows);
 
-        double fixedRowHeight = 31;  // prispôsob podľa tvojich potrieb
-        double headerHeight = 61;    // nastav hodnotu podľa tvojho vzhľadu
+        double fixedRowHeight = 31;
+        double headerHeight = 61;
         int numRows = rows.size();
 //        System.out.println(numRows);
 //        System.out.println(headerHeight + numRows * fixedRowHeight);
         transition_table.setPrefHeight(headerHeight + numRows * fixedRowHeight);
 
-        // Dynamické nastavenie preferovanej šírky – sumár všetkých stĺpcov
         double totalWidth = 15;
         for (TableColumn<TransitionRow, ?> col : transition_table.getColumns()) {
             totalWidth += col.getPrefWidth();
@@ -132,7 +118,7 @@ public class View2Controller implements Initializable {
 //        transition_table.setPrefWidth(totalWidth);
     }
 
-    // Pomocná vnútorná trieda, ktorá reprezentuje jeden riadok prechodovej matice
+    // pomocná vnútorná trieda, ktorá reprezentuje jeden riadok prechodovej matice
     public static class TransitionRow {
         private final SimpleStringProperty stateName;
         private final Map<String, SimpleStringProperty> transitions;

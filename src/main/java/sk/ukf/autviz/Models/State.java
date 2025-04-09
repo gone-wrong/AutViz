@@ -13,6 +13,10 @@ public class State implements Comparable<State> {
         return stateName;
     }
 
+    public void setStateName(String name) {
+        this.stateName = name;
+    }
+
     public Boolean isStateEnd() {
         return (stateEnd == Boolean.TRUE);
     }
