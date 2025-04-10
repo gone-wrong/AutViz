@@ -107,7 +107,7 @@ public class Automata {
             automataSaveFile.append(alphabet + "; ");
         }
         automataSaveFile.append(System.getProperty("line.separator"));
-        automataSaveFile.append("E: ");
+        automataSaveFile.append("S: ");
         for(State state: this.getStates()) {
             automataSaveFile.append(state.getName());
             if(state.isStateBegin()) automataSaveFile.append("-I");
