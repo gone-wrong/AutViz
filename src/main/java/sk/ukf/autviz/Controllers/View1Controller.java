@@ -75,7 +75,6 @@ public class View1Controller implements Initializable {
                     graphModel.addEdge(dLoop);
                 } else {
                     DirectedEdge dEdge = new DirectedEdge(source, target, t);
-                    dEdge.textProperty().set(t.getCharacter());
                     graphModel.addEdge(dEdge);
                 }
             }
@@ -146,11 +145,11 @@ public class View1Controller implements Initializable {
         a.addAlphabet("a");
         a.addAlphabet("b");
         a.addAlphabet("c");
-        a.addAlphabet("d");
 
         // Definovanie prechodov (napr. vytvoríme cyklus)
         a.addTransition(new Transition(q2, "aaaaaa", q0));
         a.addTransition(new Transition(q0, "b", q1));
+        a.addTransition(new Transition(q0, "b", q3));
         a.addTransition(new Transition(q0, "a", q3));
         a.addTransition(new Transition(q1, "a", q3));
         a.addTransition(new Transition(q1, "b", q1));

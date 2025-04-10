@@ -21,8 +21,18 @@ public class Automata {
         this.states.add(state);
     }
 
-    public void addTransition(Transition transition) {
-        this.transitions.add(transition);
+    public void addTransition(Transition newTransition) {
+        // nájsť prechod ak už existuje medzi source a destination
+        for (Transition existing : transitions) {
+            if (existing.getStateSource().getName().equals(newTransition.getStateSource().getName()) &&
+                    existing.getStateDestination().getName().equals(newTransition.getStateDestination().getName())) {
+
+                // transition už existuje pridame symbol do nej
+                existing.addSymbol(newTransition.getCharacter());
+                return;
+            }
+        }
+        transitions.add(newTransition);
     }
 
     public Set<String> getAlphabet() {

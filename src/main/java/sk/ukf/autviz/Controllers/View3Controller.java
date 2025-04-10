@@ -55,9 +55,9 @@ public class View3Controller implements Initializable {
 
     private StateTreeNode buildStateTreeRecursive(State current, Automata automata, List<String> path, String transitionLabel, Transition transition) {
         if (path.contains(current.getName())) {
-            return new StateTreeNode(current, false, transitionLabel, transition);
+            return new StateTreeNode(current, false, transition);
         }
-        StateTreeNode node = new StateTreeNode(current, true, transitionLabel, transition);
+        StateTreeNode node = new StateTreeNode(current, true, transition);
         List<String> newPath = new ArrayList<>(path);
         newPath.add(current.getName());
         for (Transition t : automata.getTransitions()) {
@@ -112,7 +112,7 @@ public class View3Controller implements Initializable {
             if (child.getTransition() != null) {
                 DirectedEdge edge = new DirectedEdge(cell, childCell, child.getTransition());
                 // aj tex, ktorý sa bude zobrazovať nad edge
-                edge.textProperty().set(child.getTransitionLabel());
+//                edge.textProperty().set(child.getTransitionLabel());
                 graphModel.addEdge(edge);
             }
         }

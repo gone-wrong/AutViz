@@ -16,6 +16,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import sk.ukf.autviz.Models.Model;
 
+import java.util.Collections;
 import java.util.Optional;
 
 public class DirectedEdgeGraphic extends Region {
@@ -31,7 +32,7 @@ public class DirectedEdgeGraphic extends Region {
     private final double arrowLength = 10;
     private final double arrowWidth = 7;
 
-    public DirectedEdgeGraphic(Graph graph, DirectedEdge edge, StringProperty textProperty) {
+    public DirectedEdgeGraphic(Graph graph, DirectedEdge edge) {
         group = new Group();
         line = new Line();
         arrowLine1 = new Line();
@@ -108,7 +109,7 @@ public class DirectedEdgeGraphic extends Region {
         final DoubleProperty textWidth = new SimpleDoubleProperty();
         final DoubleProperty textHeight = new SimpleDoubleProperty();
 
-        text.textProperty().bind(textProperty);
+        text.textProperty().bind(edge.getTransition().characterProperty());
         text.getStyleClass().add("edge-text");
         // centrovanie textu
         text.xProperty().bind(midX.subtract(textWidth.divide(2)));
@@ -149,16 +150,13 @@ public class DirectedEdgeGraphic extends Region {
         // event handler pre editáciu textu, ak je edit mode
         editRect.setOnMouseClicked(event -> {
             if (Model.getInstance().isEditMode()) {
-                // TextInputDialog, ktorý predvyplní aktuálny symbol prechodu.
-                TextInputDialog dialog = new TextInputDialog(text.getText());
-                dialog.setTitle("Edit Edge");
-                dialog.setHeaderText("Uprav prechodový symbol");
-                dialog.setContentText("Nový symbol:");
+                TextInputDialog dialog = new TextInputDialog(edge.getTransition().getCharacter());
+                dialog.setTitle("Edit Edge Symbols");
+                dialog.setHeaderText("Uprav prechodové symboly");
+                dialog.setContentText("Zadaj nové symboly (oddelené čiarkou):");
                 Optional<String> result = dialog.showAndWait();
-                result.ifPresent(newText -> {
-                    text.setText(newText);
-                    edge.textProperty().set(newText);
-                    edge.getTransition().setCharacter(newText);
+                result.ifPresent(newSymbols -> {
+                    edge.getTransition().setSymbols(Collections.singleton(newSymbols));
                 });
             }
         });

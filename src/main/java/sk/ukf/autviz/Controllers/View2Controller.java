@@ -37,11 +37,10 @@ public class View2Controller implements Initializable {
 
     private void buildTransitionMatrix(Automata automata) {
         List<String> alphabet = new ArrayList<>(automata.getAlphabet());
-        // Collections.sort(alphabet);
         List<State> states = new ArrayList<>(automata.getStates());
-        // states.sort(Comparator.comparing(State::getName));
 
         transition_table.getColumns().clear();
+        transition_table.setEditable(true);
 
         // prvý stĺpec pre názov stavu
         TableColumn<TransitionRow, String> stateColumn = new TableColumn<>("State");

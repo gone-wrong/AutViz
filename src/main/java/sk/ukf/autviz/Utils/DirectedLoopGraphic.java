@@ -15,6 +15,7 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import sk.ukf.autviz.Models.Model;
 
+import java.util.Collections;
 import java.util.Optional;
 
 public class DirectedLoopGraphic extends Region {
@@ -158,15 +159,13 @@ public class DirectedLoopGraphic extends Region {
 
         editRect.setOnMouseClicked(event -> {
             if (Model.getInstance().isEditMode()) {
-                TextInputDialog dialog = new TextInputDialog(text.getText());
-                dialog.setTitle("Edit Edge Label");
-                dialog.setHeaderText("Zadajte nový symbol pre prechod:");
-                dialog.setContentText("Nový symbol:");
+                TextInputDialog dialog = new TextInputDialog(edge.getTransition().getCharacter());
+                dialog.setTitle("Edit Edge Symbols");
+                dialog.setHeaderText("Uprav prechodové symboly");
+                dialog.setContentText("Zadaj nové symboly (oddelené čiarkou):");
                 Optional<String> result = dialog.showAndWait();
-                result.ifPresent(newText -> {
-                    //text.setText(newText);
-                    edge.textProperty().set(newText);
-                    edge.getTransition().setCharacter(newText);
+                result.ifPresent(newSymbols -> {
+                    edge.getTransition().setSymbols(Collections.singleton(newSymbols));
                 });
             }
         });

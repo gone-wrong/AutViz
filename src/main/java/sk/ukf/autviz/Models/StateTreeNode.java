@@ -5,24 +5,23 @@ import java.util.Collections;
 import java.util.List;
 
 public class StateTreeNode {
-    private final State state;             // The original state this node represents.
-    private final boolean isPrimary;       // True if this node is a primary instance (with outgoing transitions)
+    private final State state;
+    private final boolean isPrimary;
     private final List<StateTreeNode> children;
-    private final String transitionLabel;  // The transition label that led from the parent to this node.
-    private final Transition transition;   // The actual Transition object (null for the root)
+    private final Transition transition;
 
-    // For non-root nodes – includes the transition that led from the parent.
-    public StateTreeNode(State state, boolean isPrimary, String transitionLabel, Transition transition) {
+    // transition - prechod od rodiča
+    public StateTreeNode(State state, boolean isPrimary, Transition transition) {
         this.state = state;
         this.isPrimary = isPrimary;
-        this.transitionLabel = transitionLabel;
+        //this.transitionLabel = transitionLabel;
         this.transition = transition;
         this.children = new ArrayList<>();
     }
 
-    // For root node, no incoming transition.
+    // root node, bez prichádzajúceho prechodu
     public StateTreeNode(State state, boolean isPrimary) {
-        this(state, isPrimary, "", null);
+        this(state, isPrimary, null);
     }
 
     public void addChild(StateTreeNode child) {
@@ -41,15 +40,10 @@ public class StateTreeNode {
         return Collections.unmodifiableList(children);
     }
 
-    public String getTransitionLabel() {
-        return transitionLabel;
-    }
-
     public Transition getTransition() {
         return transition;
     }
 
-    // Other utility methods…
     @Override
     public String toString() {
         return state.getName();

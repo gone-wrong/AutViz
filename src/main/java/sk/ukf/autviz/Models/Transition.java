@@ -1,14 +1,24 @@
 package sk.ukf.autviz.Models;
 
+import javafx.beans.property.ReadOnlyStringWrapper;
+import javafx.beans.property.StringProperty;
+
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
 public class Transition {
     private State stateSource;
-    private String Character;
+    private final Set<String> symbols = new LinkedHashSet<>();
     private State stateDestination;
 
-    public Transition(State stateSource, String character, State stateDestination) {
+    private final ReadOnlyStringWrapper characterWrapper = new ReadOnlyStringWrapper();
+
+    public Transition(State stateSource, String symbol, State stateDestination) {
         this.stateSource = stateSource;
-        this.Character = character;
         this.stateDestination = stateDestination;
+        symbols.add(symbol);
+        updateCharacterWrapper();
     }
 
     public State getStateDestination() {
@@ -20,10 +30,34 @@ public class Transition {
     }
 
     public String getCharacter() {
-        return Character;
+        return characterWrapper.get();
     }
 
-    public void setCharacter(String newCharacter) {
-        this.Character = newCharacter;
+    public StringProperty characterProperty() {
+        return characterWrapper;
+    }
+
+    public Set<String> getSymbols() {
+        return symbols;
+    }
+
+    public void addSymbol(String symbol) {
+        symbols.add(symbol);
+        updateCharacterWrapper();
+    }
+
+    public void removeSymbol(String symbol) {
+        symbols.remove(symbol);
+        updateCharacterWrapper();
+    }
+
+    public void setSymbols(Collection<String> newSymbols) {
+        symbols.clear();
+        symbols.addAll(newSymbols);
+        updateCharacterWrapper();
+    }
+
+    private void updateCharacterWrapper() {
+        characterWrapper.set(String.join(",", symbols));
     }
 }
