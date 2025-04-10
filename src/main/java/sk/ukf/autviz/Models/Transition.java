@@ -17,8 +17,14 @@ public class Transition {
     public Transition(State stateSource, String symbol, State stateDestination) {
         this.stateSource = stateSource;
         this.stateDestination = stateDestination;
-        symbols.add(symbol);
+        String processedSymbol = processSymbol(symbol);
+        symbols.add(processedSymbol);
         updateCharacterWrapper();
+    }
+
+    private String processSymbol(String sym) {
+        String trimmed = sym.trim();
+        return trimmed.isEmpty() ? "ε" : trimmed;
     }
 
     public State getStateDestination() {
@@ -47,17 +53,25 @@ public class Transition {
     }
 
     public void removeSymbol(String symbol) {
-        symbols.remove(symbol);
+        String processedSymbol = processSymbol(symbol);
+        symbols.remove(processedSymbol);
         updateCharacterWrapper();
     }
 
-    public void setSymbols(Collection<String> newSymbols) {
+    public void setSymbols(String symbolsStr) {
         symbols.clear();
-        symbols.addAll(newSymbols);
+        String[] tokens = symbolsStr.split(",", -1);
+        for (String token : tokens) {
+            symbols.add(processSymbol(token));
+        }
         updateCharacterWrapper();
     }
 
     private void updateCharacterWrapper() {
-        characterWrapper.set(String.join(",", symbols));
+        if (symbols.isEmpty()) {
+            characterWrapper.set("ε");
+        } else {
+            characterWrapper.set(String.join(",", symbols));
+        }
     }
 }

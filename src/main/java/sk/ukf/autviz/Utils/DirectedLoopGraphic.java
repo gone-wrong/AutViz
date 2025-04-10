@@ -128,7 +128,7 @@ public class DirectedLoopGraphic extends Region {
         group.getChildren().addAll(arrowLine1, arrowLine2);
 
         // text v strede krivky
-        text.textProperty().bind(textProperty);
+        text.textProperty().bind(edge.getTransition().characterProperty());
         double width = text.getBoundsInLocal().getWidth();
         text.xProperty().bind(Bindings.createDoubleBinding(() ->
                 ((curve.getControlX1() + curve.getControlX2()) / 2) - width / 2, curve.controlX1Property(), curve.controlX2Property()));
@@ -165,7 +165,7 @@ public class DirectedLoopGraphic extends Region {
                 dialog.setContentText("Zadaj nové symboly (oddelené čiarkou):");
                 Optional<String> result = dialog.showAndWait();
                 result.ifPresent(newSymbols -> {
-                    edge.getTransition().setSymbols(Collections.singleton(newSymbols));
+                    edge.getTransition().setSymbols(newSymbols);
                 });
             }
         });

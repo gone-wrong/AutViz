@@ -156,7 +156,7 @@ public class DirectedEdgeGraphic extends Region {
                 dialog.setContentText("Zadaj nové symboly (oddelené čiarkou):");
                 Optional<String> result = dialog.showAndWait();
                 result.ifPresent(newSymbols -> {
-                    edge.getTransition().setSymbols(Collections.singleton(newSymbols));
+                    edge.getTransition().setSymbols(newSymbols);
                 });
             }
         });
