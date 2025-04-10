@@ -1,5 +1,7 @@
 package sk.ukf.autviz.Models;
 
+import java.util.Objects;
+
 public class State implements Comparable<State> {
     private String stateName;
     private Boolean stateEnd;
@@ -36,5 +38,19 @@ public class State implements Comparable<State> {
     public int compareTo(State other)
     {
         return getName().compareTo(other.getName());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof State) {
+            State other = (State) obj;
+            return other.getName().equals(this.getName());
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(stateName);
     }
 }
