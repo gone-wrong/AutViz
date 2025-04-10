@@ -36,6 +36,7 @@ public class View1Controller implements Initializable {
 
     private Graph graph;
     private com.fxgraph.graph.Model graphModel; // model z FXGraph
+    private Map<State, ICell> stateMapping = new HashMap<>();
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -45,31 +46,29 @@ public class View1Controller implements Initializable {
             automata = createSampleAutomaton();
             Model.getInstance().setCurrentAutomata(automata);
         }
-        updateVisualization(automata);
+        this.graph = new Graph();
+        this.graphModel = graph.getModel();
+        buildVisualization(automata);
 
         addButtonListeners();
     }
 
-    public void updateVisualization(Automata automata) {
+    public void buildVisualization(Automata automata) {
         graph_region.getChildren().clear();
-
-        graph = new Graph();
-        graphModel = graph.getModel();
         graph.beginUpdate();
 
-        // mapa pre prepojenie názvov stavov s grafickými bunkami
-        Map<String, ICell> stateMapping = new HashMap<>();
+        stateMapping.clear();
+        // naplnenie mapy pre prepojenie názvov stavov s grafickými bunkami
         for (State s : automata.getStates()) {
-            AbstractCell cell = new CircleCell(s);
+            AbstractCell cell = new CircleCell(s, true);
             graphModel.addCell(cell);
-            stateMapping.put(s.getName(), cell);
+            stateMapping.put(s, cell);
         }
 
         for (Transition t : automata.getTransitions()) {
-            ICell source = stateMapping.get(t.getStateSource().getName());
-            ICell target = stateMapping.get(t.getStateDestination().getName());
+            ICell source = stateMapping.get(t.getStateSource());
+            ICell target = stateMapping.get(t.getStateDestination());
             if (source != null && target != null) {
-                // ak je zdroj rovnaký ako cieľ, ide o self-loop.
                 if (t.getStateSource().equals(t.getStateDestination())) {
                     DirectedLoop dLoop = new DirectedLoop(source, t);
                     dLoop.textProperty().set(t.getCharacter());
@@ -81,6 +80,7 @@ public class View1Controller implements Initializable {
                 }
             }
         }
+
         graph.endUpdate();
 
         // graph.layout(new AbegoTreeLayout(200, 150, org.abego.treelayout.Configuration.Location.Top));

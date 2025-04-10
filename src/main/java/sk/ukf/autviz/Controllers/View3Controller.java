@@ -101,11 +101,8 @@ public class View3Controller implements Initializable {
 
     private void addStateTreeNodes(StateTreeNode node, Map<StateTreeNode, ICell> mapping) {
         ICell cell;
-        if (node.getState().isStateBegin()) {
-            cell = createCellForNode(node);
-        } else {
-            cell = new CircleCell(node.getState());
-        }
+        cell = new CircleCell(node.getState(), false);
+
         graphModel.addCell(cell);
         mapping.put(node, cell);
 
@@ -119,15 +116,6 @@ public class View3Controller implements Initializable {
                 graphModel.addEdge(edge);
             }
         }
-    }
-
-
-    private ICell createCellForNode(StateTreeNode node) {
-            State s = node.getState();
-            State sCopy = new State(s.getName());
-            sCopy.setStateEnd(s.isStateEnd());
-            sCopy.setStateBegin(false);
-            return new CircleCell(sCopy);
     }
 
     // pomocná trieda pre prenos aktuálnej vodorovnej pozície cez rekurziu

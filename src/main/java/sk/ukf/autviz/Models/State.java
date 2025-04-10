@@ -1,22 +1,29 @@
 package sk.ukf.autviz.Models;
 
+import javafx.beans.property.StringProperty;
+import javafx.beans.property.SimpleStringProperty;
+
 import java.util.Objects;
 
 public class State implements Comparable<State> {
-    private String stateName;
+    private final StringProperty stateName = new SimpleStringProperty();
     private Boolean stateEnd;
     private Boolean stateBegin;
 
     public State(String name) {
-        this.stateName = name;
+        this.stateName.set(name);
     }
 
     public String getName() {
+        return stateName.get();
+    }
+
+    public StringProperty nameProperty() {
         return stateName;
     }
 
     public void setStateName(String name) {
-        this.stateName = name;
+        stateName.set(name);
     }
 
     public Boolean isStateEnd() {
@@ -42,8 +49,7 @@ public class State implements Comparable<State> {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof State) {
-            State other = (State) obj;
+        if (obj instanceof State other) {
             return other.getName().equals(this.getName());
         }
         return false;
