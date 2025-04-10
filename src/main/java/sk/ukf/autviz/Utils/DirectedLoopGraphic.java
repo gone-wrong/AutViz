@@ -6,11 +6,16 @@ import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Group;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Line;
+import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
+import sk.ukf.autviz.Models.Model;
+
+import java.util.Optional;
 
 public class DirectedLoopGraphic extends Region {
 
@@ -19,14 +24,13 @@ public class DirectedLoopGraphic extends Region {
     private final Line arrowLine1;
     private final Line arrowLine2;
     private final Text text;
+    private final Rectangle editRect;
 
-    // Parametre pre arrow head – upraviteľné podľa vzhľadu
     private final double arrowLength = 10;
     private final double arrowWidth = 7;
 
-    // Parametre pre self-loop
     private final double nodeRadius = 30;
-    private final double offsetAngle = Math.toRadians(30); // 30° v radianoch
+    private final double offsetAngle = Math.toRadians(30);
     private final double controlOffset = 40; // posun nahor pre kontrolné body
 
     public DirectedLoopGraphic(Graph graph, DirectedLoop edge, StringProperty textProperty) {
@@ -35,36 +39,34 @@ public class DirectedLoopGraphic extends Region {
         arrowLine1 = new Line();
         arrowLine2 = new Line();
         text = new Text();
+        editRect = new Rectangle();
 
-        // Získaj stred uzla (pre self-loop je zdroj = cieľ)
+        // stred uzla (pre self-loop je zdroj = cieľ)
         final DoubleBinding centerX = edge.getSource().getXAnchor(graph, edge);
         final DoubleBinding centerY = edge.getSource().getYAnchor(graph, edge);
 
-        // Východiskový uhol pre vrchný bod kruhu je -90° (alebo -PI/2)
         double baseAngle = -Math.PI / 2;
 
-        // Vypočítaj body na obvode kruhu:
-        // Bod a: rotácia o -offsetAngle od vrchu (posunutie doľava)
+        // vypočítanie bodov na obvode kruhu:
         DoubleBinding aX = Bindings.createDoubleBinding(() ->
                 centerX.get() + nodeRadius * Math.cos(baseAngle - offsetAngle), centerX);
         DoubleBinding aY = Bindings.createDoubleBinding(() ->
                 centerY.get() + nodeRadius * Math.sin(baseAngle - offsetAngle), centerY);
 
-        // Bod b: rotácia o +offsetAngle od vrchu (posunutie doprava)
         DoubleBinding bX = Bindings.createDoubleBinding(() ->
                 centerX.get() + nodeRadius * Math.cos(baseAngle + offsetAngle) - 1, centerX);
         DoubleBinding bY = Bindings.createDoubleBinding(() ->
                 centerY.get() + nodeRadius * Math.sin(baseAngle + offsetAngle) - 1, centerY);
 
-        // Nastavíme body CubicCurve:
-        // Začiatok = bod a, koniec = bod b.
+        // body CubicCurve:
+        // začiatok = bod a, koniec = bod b.
         curve.startXProperty().bind(aX);
         curve.startYProperty().bind(aY);
         curve.endXProperty().bind(bX);
         curve.endYProperty().bind(bY);
 
-        // Kontrolné body: budú rovnaké ako body a, b, ale posunuté nahor (znížená hodnota y)
-        DoubleBinding controlX1 = aX; // môžeme ponechať x rovnaké
+        // kontrolné body
+        DoubleBinding controlX1 = aX;
         DoubleBinding controlY1 = Bindings.createDoubleBinding(() ->
                 aY.get() - controlOffset, aY);
         DoubleBinding controlX2 = bX;
@@ -82,7 +84,7 @@ public class DirectedLoopGraphic extends Region {
 
         group.getChildren().add(curve);
 
-        // Arrow head: Vypočítame deriváciu CubicCurve v bode t=1, ktorá je 3*(end - control2).
+        // Arrow head: derivácia CubicCurve v bode t=1, ktorá je 3*(end - control2).
         arrowLine1.endXProperty().bind(curve.endXProperty());
         arrowLine1.endYProperty().bind(curve.endYProperty());
         arrowLine2.endXProperty().bind(curve.endXProperty());
@@ -124,7 +126,7 @@ public class DirectedLoopGraphic extends Region {
         Platform.runLater(updateArrow);
         group.getChildren().addAll(arrowLine1, arrowLine2);
 
-        // Nastav textový štítok – umiestni ho približne v strede krivky
+        // text v strede krivky
         text.textProperty().bind(textProperty);
         double width = text.getBoundsInLocal().getWidth();
         text.xProperty().bind(Bindings.createDoubleBinding(() ->
@@ -134,7 +136,43 @@ public class DirectedLoopGraphic extends Region {
 
         group.getChildren().add(text);
 
+        final double EDIT_EXTRA = 10; // extra šírka
+        final double EDIT_HEIGHT = 20;
+        editRect.setFill(Color.TRANSPARENT);
+        // Debug
+        editRect.setStroke(Color.RED);
+
+        DoubleBinding controlDistance = Bindings.createDoubleBinding(() ->
+                        Math.hypot(curve.getControlX2() - curve.getControlX1(), curve.getControlY2() - curve.getControlY1()),
+                curve.controlX1Property(), curve.controlX2Property(), curve.controlY1Property(), curve.controlY2Property());
+
+        editRect.widthProperty().bind(controlDistance.add(EDIT_EXTRA));
+        editRect.setHeight(EDIT_HEIGHT);
+
+        DoubleBinding midX = curve.controlX1Property().add(curve.controlX2Property()).divide(2);
+        DoubleBinding midY = curve.controlY1Property().add(curve.controlY2Property()).divide(2);
+        editRect.layoutXProperty().bind(midX.subtract(editRect.widthProperty().divide(2)));
+        editRect.layoutYProperty().bind(midY.subtract(EDIT_HEIGHT / 2));
+
+        group.getChildren().add(editRect);
+
+        editRect.setOnMouseClicked(event -> {
+            if (Model.getInstance().isEditMode()) {
+                TextInputDialog dialog = new TextInputDialog(text.getText());
+                dialog.setTitle("Edit Edge Label");
+                dialog.setHeaderText("Zadajte nový symbol pre prechod:");
+                dialog.setContentText("Nový symbol:");
+                Optional<String> result = dialog.showAndWait();
+                result.ifPresent(newText -> {
+                    //text.setText(newText);
+                    edge.textProperty().set(newText);
+                    edge.getTransition().setCharacter(newText);
+                });
+            }
+        });
+
         getChildren().add(group);
+        this.setPickOnBounds(false);
     }
 
     public Region getGraphic() {

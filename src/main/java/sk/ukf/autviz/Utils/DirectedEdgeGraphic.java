@@ -8,12 +8,15 @@ import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Group;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import sk.ukf.autviz.Models.Model;
+
+import java.util.Optional;
 
 public class DirectedEdgeGraphic extends Region {
 
@@ -141,46 +144,29 @@ public class DirectedEdgeGraphic extends Region {
             return Math.toDegrees(Math.atan2(dy, dx));
         }, sourceX, sourceY, targetX, targetY);
         editRect.rotateProperty().bind(angle.subtract(90));
+        group.getChildren().add(editRect);
 
         // event handler pre editáciu textu, ak je edit mode
         editRect.setOnMouseClicked(event -> {
-            // Ak sme v editovacom móde
             if (Model.getInstance().isEditMode()) {
-                System.out.println("Editing" + edge.textProperty().getValue());
-                // Vytvoríme TextField s aktuálnym textom
-                javafx.scene.control.TextField tf = new javafx.scene.control.TextField(text.getText());
-
-                double sceneX = text.localToScene(0, 0).getX();
-                double sceneY = text.localToScene(0, 0).getY();
-
-                double parentX = group.sceneToLocal(sceneX, sceneY).getX();
-                double parentY = group.sceneToLocal(sceneX, sceneY).getY();
-
-                tf.setLayoutX(parentX);
-                tf.setLayoutY(parentY);
-
-                group.getChildren().add(tf);
-                tf.requestFocus();
-
-                // handler pre stlačenie Enter (potvrdenie editácie)
-                tf.setOnAction(e -> {
-                    String newText = tf.getText();
-//                    text.setText(newText);
+                // TextInputDialog, ktorý predvyplní aktuálny symbol prechodu.
+                TextInputDialog dialog = new TextInputDialog(text.getText());
+                dialog.setTitle("Edit Edge");
+                dialog.setHeaderText("Uprav prechodový symbol");
+                dialog.setContentText("Nový symbol:");
+                Optional<String> result = dialog.showAndWait();
+                result.ifPresent(newText -> {
+                    text.setText(newText);
                     edge.textProperty().set(newText);
-                    edge.getTransition().setCharacter(newText);  // Aktualizujeme modelový prechod
-                    group.getChildren().remove(tf);
-                });
-
-                tf.focusedProperty().addListener((obs, oldVal, newVal) -> {
-                    if (!newVal) {
-                        group.getChildren().remove(tf);
-                    }
+                    edge.getTransition().setCharacter(newText);
                 });
             }
         });
 
-        group.getChildren().add(editRect);
         getChildren().add(group);
+        // vypnutie zachytávania klikov Region
+        this.setPickOnBounds(false);
+//        this.setStyle("-fx-border-color: red; -fx-border-width: 1px;");
     }
 
     public Region getGraphic() {

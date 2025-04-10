@@ -71,7 +71,7 @@ public class View1Controller implements Initializable {
             if (source != null && target != null) {
                 // ak je zdroj rovnaký ako cieľ, ide o self-loop.
                 if (t.getStateSource().equals(t.getStateDestination())) {
-                    DirectedLoop dLoop = new DirectedLoop(source);
+                    DirectedLoop dLoop = new DirectedLoop(source, t);
                     dLoop.textProperty().set(t.getCharacter());
                     graphModel.addEdge(dLoop);
                 } else {
