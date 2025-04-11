@@ -13,7 +13,7 @@ import javafx.scene.shape.Rectangle;
 import sk.ukf.autviz.Models.Automata;
 import sk.ukf.autviz.Models.State;
 import sk.ukf.autviz.Models.Transition;
-import sk.ukf.autviz.Models.Model; // Naša Model trieda, ako singleton
+import sk.ukf.autviz.Models.Model;
 import sk.ukf.autviz.Utils.CircleCell;
 import sk.ukf.autviz.Utils.DirectedEdge;
 import sk.ukf.autviz.Utils.DirectedLoop;
@@ -149,6 +149,8 @@ public class View1Controller implements Initializable {
         // Definovanie prechodov (napr. vytvoríme cyklus)
         a.addTransition(new Transition(q2, "aaaaaa", q0));
         a.addTransition(new Transition(q0, "b", q1));
+        // testovanie curved DirectedEdge
+        a.addTransition(new Transition(q1, "b", q0));
         a.addTransition(new Transition(q0, "b", q3));
         a.addTransition(new Transition(q0, "a", q3));
         a.addTransition(new Transition(q1, "a", q3));

@@ -22,16 +22,30 @@ public class Automata {
     }
 
     public void addTransition(Transition newTransition) {
-        // nájsť prechod ak už existuje medzi source a destination
         for (Transition existing : transitions) {
             if (existing.getStateSource().getName().equals(newTransition.getStateSource().getName()) &&
                     existing.getStateDestination().getName().equals(newTransition.getStateDestination().getName())) {
 
-                // transition už existuje pridame symbol do nej
                 existing.addSymbol(newTransition.getCharacter());
+
+                if (transitions.stream().anyMatch(t ->
+                        t != existing &&
+                                t.getStateSource().getName().equals(newTransition.getStateDestination().getName()) &&
+                                t.getStateDestination().getName().equals(newTransition.getStateSource().getName())
+                )) {
+                    existing.setHasOpposite(true);
+                    newTransition.setHasOpposite(true);
+                }
                 return;
             }
+
+            if (existing.getStateSource().getName().equals(newTransition.getStateDestination().getName()) &&
+                    existing.getStateDestination().getName().equals(newTransition.getStateSource().getName())) {
+                existing.setHasOpposite(true);
+                newTransition.setHasOpposite(true);
+            }
         }
+
         transitions.add(newTransition);
     }
 
@@ -275,5 +289,9 @@ public class Automata {
         }
         states = newStates;
         transitions = newTransitions;
+    }
+
+    public void validate() {
+
     }
 }

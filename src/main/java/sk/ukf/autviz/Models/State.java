@@ -1,5 +1,7 @@
 package sk.ukf.autviz.Models;
 
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.property.SimpleStringProperty;
 
@@ -7,8 +9,8 @@ import java.util.Objects;
 
 public class State implements Comparable<State> {
     private final StringProperty stateName = new SimpleStringProperty();
-    private Boolean stateEnd;
-    private Boolean stateBegin;
+    private final BooleanProperty stateEnd = new SimpleBooleanProperty(false);
+    private final BooleanProperty stateBegin = new SimpleBooleanProperty(false);
 
     public State(String name) {
         this.stateName.set(name);
@@ -26,20 +28,28 @@ public class State implements Comparable<State> {
         stateName.set(name);
     }
 
-    public Boolean isStateEnd() {
-        return (stateEnd == Boolean.TRUE);
+    public boolean isStateEnd() {
+        return stateEnd.get();
     }
 
-    public Boolean isStateBegin() {
-        return (stateBegin == Boolean.TRUE);
+    public void setStateEnd(boolean end) {
+        stateEnd.set(end);
     }
 
-    public void setStateEnd(Boolean end) {
-        this.stateEnd = end;
+    public BooleanProperty stateEndProperty() {
+        return stateEnd;
     }
 
-    public void setStateBegin(Boolean begin) {
-        this.stateBegin = begin;
+    public boolean isStateBegin() {
+        return stateBegin.get();
+    }
+
+    public void setStateBegin(boolean begin) {
+        stateBegin.set(begin);
+    }
+
+    public BooleanProperty stateBeginProperty() {
+        return stateBegin;
     }
 
     public int compareTo(State other)

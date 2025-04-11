@@ -111,6 +111,7 @@ public class View3Controller implements Initializable {
             ICell childCell = mapping.get(child);
             if (child.getTransition() != null) {
                 DirectedEdge edge = new DirectedEdge(cell, childCell, child.getTransition());
+                edge.setStateTreeViz(true);
                 graphModel.addEdge(edge);
             }
         }

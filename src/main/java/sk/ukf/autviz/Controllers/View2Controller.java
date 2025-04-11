@@ -1,5 +1,6 @@
 package sk.ukf.autviz.Controllers;
 
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -14,144 +15,139 @@ import sk.ukf.autviz.Models.State;
 import sk.ukf.autviz.Models.Transition;
 
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.ResourceBundle;
-import java.util.HashMap;
-import java.util.Map;
 
 public class View2Controller implements Initializable {
 
+    private static final double COLUMN_PREF_WIDTH = 120;
+    private static final double FIXED_CELL_SIZE = 30;
+    private static final double HEADER_HEIGHT = 50;
 
     public TableView<TransitionRow> transition_table;
-
-    private static final double COLUMN_PREF_WIDTH = 120;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         System.out.println("Initializing View2Controller");
         Automata automata = Model.getInstance().getCurrentAutomata();
-        buildTransitionMatrix(automata);
-        // transition_table.setEditable(false);
+
+        buildTransitionTable(automata);
+
+        transition_table.prefHeightProperty().bind(Bindings.size(transition_table.getItems())
+                .multiply(FIXED_CELL_SIZE)
+                .add(HEADER_HEIGHT));
     }
 
-    private void buildTransitionMatrix(Automata automata) {
-        List<String> alphabet = new ArrayList<>(automata.getAlphabet());
-        List<State> states = new ArrayList<>(automata.getStates());
+    private void buildTransitionTable(Automata automata) {
+        ObservableList<TransitionRow> rows = FXCollections.observableArrayList();
+        for (Transition t : automata.getTransitions()) {
+            rows.add(new TransitionRow(t.getStateSource(), t, t.getStateDestination()));
+        }
+        transition_table.setItems(rows);
 
-        transition_table.getColumns().clear();
-        transition_table.setEditable(true);
-
-        // prvý stĺpec pre názov stavu
-        TableColumn<TransitionRow, String> stateColumn = new TableColumn<>("State");
-        stateColumn.setCellValueFactory(cellData -> cellData.getValue().stateNameProperty());
-        stateColumn.setPrefWidth(COLUMN_PREF_WIDTH);
-
-        // cell factory pre zvýraznenie začiatkových a koncových stavov
-        stateColumn.setCellFactory(column -> new TableCell<>() {
+        TableColumn<TransitionRow, String> sourceCol = new TableColumn<>("Source");
+        sourceCol.setCellValueFactory(cellData -> cellData.getValue().sourceProperty());
+        sourceCol.setPrefWidth(COLUMN_PREF_WIDTH);
+        sourceCol.setCellFactory(col -> new TableCell<TransitionRow, String>() {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                if (empty || item == null) {
+                // Always unbind any previous binding.
+                textProperty().unbind();
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
                     setText(null);
                     setGraphic(null);
                     setStyle("");
                 } else {
-                    TransitionRow row = getTableView().getItems().get(getIndex());
-                    String displayText = item;
-                    if (row.isBegin() && row.isEnd()) {
-                        displayText = "► " + item + " ★";
-                    } else if (row.isBegin()) {
-                        displayText = "► " + item;
-                    } else if (row.isEnd()) {
-                        displayText = item + " ★";
-                    }
-                    setText(displayText);
-                    // Pridanie css štýlovania
+                    TransitionRow row = getTableRow().getItem();
+                    // Bind the cell's textProperty so that it reflects changes in the state.
+                    textProperty().bind(Bindings.createStringBinding(
+                            () -> decorateStateName(
+                                    row.getSource().nameProperty().get(),
+                                    row.getSource().stateBeginProperty().get(),
+                                    row.getSource().stateEndProperty().get()
+                            ),
+                            row.getSource().nameProperty(),
+                            row.getSource().stateBeginProperty(),
+                            row.getSource().stateEndProperty()
+                    ));
                     setStyle("-fx-font-weight: bold;");
                 }
             }
         });
-        transition_table.getColumns().add(stateColumn);
 
-        // stĺpce pre každý symbol z abecedy
-        for (String symbol : alphabet) {
-            TableColumn<TransitionRow, String> symbolCol = new TableColumn<>(symbol);
-            symbolCol.setPrefWidth(COLUMN_PREF_WIDTH);
-            symbolCol.setCellValueFactory(cellData -> cellData.getValue().getTransition(symbol));
-            transition_table.getColumns().add(symbolCol);
-        }
+        TableColumn<TransitionRow, String> symbolCol = new TableColumn<>("Symbol(s)");
+        symbolCol.setCellValueFactory(cellData -> cellData.getValue().symbolProperty());
+        symbolCol.setPrefWidth(COLUMN_PREF_WIDTH);
 
-        // ObservableList riadkov pre TableView
-        ObservableList<TransitionRow> rows = FXCollections.observableArrayList();
-        for (State state : states) {
-            TransitionRow row = new TransitionRow(state.getName(), state.isStateBegin(), state.isStateEnd());
-            for (String symbol : alphabet) {
-                String destination = "";
-                for (Transition t : automata.getTransitions()) {
-                    if (t.getStateSource().getName().equals(state.getName())
-                            && t.getCharacter().contains(symbol)) {
-                        destination = t.getStateDestination().getName();
-                        break;
-                    }
+        TableColumn<TransitionRow, String> destinationCol = new TableColumn<>("Destination");
+        destinationCol.setCellValueFactory(cellData -> cellData.getValue().destinationProperty());
+        destinationCol.setPrefWidth(COLUMN_PREF_WIDTH);
+        destinationCol.setCellFactory(col -> new TableCell<TransitionRow, String>() {
+            @Override
+            protected void updateItem(String item, boolean empty) {
+                super.updateItem(item, empty);
+                textProperty().unbind();
+                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                    setText(null);
+                    setGraphic(null);
+                    setStyle("");
+                } else {
+                    TransitionRow row = getTableRow().getItem();
+                    // Bind the cell's textProperty for the destination state.
+                    textProperty().bind(Bindings.createStringBinding(
+                            () -> decorateStateName(
+                                    row.getDestination().nameProperty().get(),
+                                    row.getDestination().stateBeginProperty().get(),
+                                    row.getDestination().stateEndProperty().get()
+                            ),
+                            row.getDestination().nameProperty(),
+                            row.getDestination().stateBeginProperty(),
+                            row.getDestination().stateEndProperty()
+                    ));
+                    setStyle("-fx-font-weight: bold;");
                 }
-                row.setTransition(symbol, destination);
             }
-            rows.add(row);
-        }
-        transition_table.setItems(rows);
+        });
 
-        double fixedRowHeight = 31;
-        double headerHeight = 61;
-        int numRows = rows.size();
-//        System.out.println(numRows);
-//        System.out.println(headerHeight + numRows * fixedRowHeight);
-        transition_table.setPrefHeight(headerHeight + numRows * fixedRowHeight);
-
-        double totalWidth = 15;
-        for (TableColumn<TransitionRow, ?> col : transition_table.getColumns()) {
-            totalWidth += col.getPrefWidth();
-//            System.out.println(col.getPrefWidth());
-        }
-//        System.out.println(totalWidth);
-//        transition_table.setPrefWidth(totalWidth);
+        transition_table.getColumns().setAll(sourceCol, symbolCol, destinationCol);
     }
 
-    // pomocná vnútorná trieda, ktorá reprezentuje jeden riadok prechodovej matice
+    private String decorateStateName(String name, boolean isBegin, boolean isEnd) {
+        String prefix = isBegin ? "► " : "";
+        String suffix = isEnd ? " !" : "";
+        return prefix + name + suffix;
+    }
+
     public static class TransitionRow {
-        private final SimpleStringProperty stateName;
-        private final Map<String, SimpleStringProperty> transitions;
-        private final boolean isBegin;
-        private final boolean isEnd;
+        private final State source;
+        private final Transition transition;
+        private final State destination;
 
-        public TransitionRow(String stateName, boolean isBegin, boolean isEnd) {
-            this.stateName = new SimpleStringProperty(stateName);
-            this.transitions = new HashMap<>();
-            this.isBegin = isBegin;
-            this.isEnd = isEnd;
+        public TransitionRow(State source, Transition transition, State destination) {
+            this.source = source;
+            this.transition = transition;
+            this.destination = destination;
         }
 
-        public StringProperty stateNameProperty() {
-            return stateName;
+        // These getters return the observable properties from the model objects.
+        public StringProperty sourceProperty() {
+            return source.nameProperty();
         }
 
-        public boolean isBegin() {
-            return isBegin;
+        public StringProperty symbolProperty() {
+            return transition.characterProperty();
         }
 
-        public boolean isEnd() {
-            return isEnd;
+        public StringProperty destinationProperty() {
+            return destination.nameProperty();
         }
 
-        public void setTransition(String symbol, String destination) {
-            transitions.put(symbol, new SimpleStringProperty(destination));
+        public State getSource() {
+            return source;
         }
 
-        public SimpleStringProperty getTransition(String symbol) {
-            if (!transitions.containsKey(symbol)) {
-                transitions.put(symbol, new SimpleStringProperty(""));
-            }
-            return transitions.get(symbol);
+        public State getDestination() {
+            return destination;
         }
     }
 }

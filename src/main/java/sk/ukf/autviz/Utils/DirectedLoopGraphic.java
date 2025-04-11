@@ -4,6 +4,8 @@ import com.fxgraph.graph.Graph;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.StringProperty;
 import javafx.scene.Group;
 import javafx.scene.control.TextInputDialog;
@@ -129,11 +131,16 @@ public class DirectedLoopGraphic extends Region {
 
         // text v strede krivky
         text.textProperty().bind(edge.getTransition().characterProperty());
-        double width = text.getBoundsInLocal().getWidth();
-        text.xProperty().bind(Bindings.createDoubleBinding(() ->
-                ((curve.getControlX1() + curve.getControlX2()) / 2) - width / 2, curve.controlX1Property(), curve.controlX2Property()));
-        text.yProperty().bind(Bindings.createDoubleBinding(() ->
-                (curve.getControlY1() + curve.getControlY2()) / 2, curve.controlY1Property(), curve.controlY2Property()));
+        final DoubleProperty textWidth = new SimpleDoubleProperty();
+        final DoubleProperty textHeight = new SimpleDoubleProperty();
+        text.xProperty().bind(controlX1.add(controlX2).divide(2).subtract(textWidth.divide(2)));
+        text.yProperty().bind(controlY1);
+        Runnable recalculateTextBounds = () -> {
+            textWidth.set(text.getLayoutBounds().getWidth());
+            textHeight.set(text.getLayoutBounds().getHeight());
+        };
+        text.boundsInLocalProperty().addListener((obs, oldVal, newVal) -> recalculateTextBounds.run());
+        text.textProperty().addListener((obs, oldVal, newVal) -> recalculateTextBounds.run());
 
         group.getChildren().add(text);
 

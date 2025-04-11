@@ -10,6 +10,7 @@ import sk.ukf.autviz.Models.Transition;
 public class DirectedEdge extends AbstractEdge {
 
     private Transition transition;  // referencia na modelový prechod
+    private boolean StateTreeViz = false;
 
     public DirectedEdge(ICell source, ICell target, Transition transition) {
         super(source, target);
@@ -27,5 +28,13 @@ public class DirectedEdge extends AbstractEdge {
     @Override
     public DirectedEdgeGraphic getGraphic(Graph graph) {
         return new DirectedEdgeGraphic(graph, this);
+    }
+
+    public boolean isStateTreeViz() {
+        return StateTreeViz;
+    }
+
+    public void setStateTreeViz(boolean stateTreeViz) {
+        StateTreeViz = stateTreeViz;
     }
 }
