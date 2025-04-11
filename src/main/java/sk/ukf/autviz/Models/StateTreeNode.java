@@ -14,7 +14,6 @@ public class StateTreeNode {
     public StateTreeNode(State state, boolean isPrimary, Transition transition) {
         this.state = state;
         this.isPrimary = isPrimary;
-        //this.transitionLabel = transitionLabel;
         this.transition = transition;
         this.children = new ArrayList<>();
     }
@@ -42,6 +41,10 @@ public class StateTreeNode {
 
     public Transition getTransition() {
         return transition;
+    }
+
+    public String getTransitionLabel() {
+        return transition != null ? transition.getCharacter() : "";
     }
 
     @Override

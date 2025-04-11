@@ -3,14 +3,13 @@ package sk.ukf.autviz.Models;
 import javafx.beans.property.ReadOnlyStringWrapper;
 import javafx.beans.property.StringProperty;
 
-import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
 public class Transition {
-    private State stateSource;
+    private final State stateSource;
     private final Set<String> symbols = new LinkedHashSet<>();
-    private State stateDestination;
+    private final State stateDestination;
 
     private final ReadOnlyStringWrapper characterWrapper = new ReadOnlyStringWrapper();
 
@@ -68,7 +67,8 @@ public class Transition {
     }
 
     private void updateCharacterWrapper() {
-        if (symbols.isEmpty()) {
+        System.out.println(symbols);
+        if (symbols.size() == 1 && symbols.contains("ε")) {
             characterWrapper.set("ε");
         } else {
             characterWrapper.set(String.join(",", symbols));
