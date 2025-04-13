@@ -148,7 +148,7 @@ public class Automata {
 
     public Map<String, Set<String>> getEpsilonReachabilityMap(){
         Map<String, Set<String>> reachabilityMap = new HashMap<>();
-        for (Transition t : transitions.stream().filter(transition -> transition.getCharacter().isEmpty()).toList()){
+        for (Transition t : transitions.stream().filter(transition -> transition.getSymbols().contains("ε")).toList()){
             if (!reachabilityMap.containsKey(t.getStateSource().getName())) {
                 reachabilityMap.put(t.getStateSource().getName(), new HashSet<>(Arrays.asList(t.getStateDestination().getName())));
             } else {
@@ -179,59 +179,87 @@ public class Automata {
     }
 
     private boolean checkDetermination(){
-        if (transitions.stream().anyMatch(transition -> transition.getCharacter().isEmpty())){
+        if (transitions.stream().anyMatch(transition -> transition.getSymbols().contains("ε"))){
             return false;
         }
-        return transitions.stream().map(transition -> transition.getStateSource().toString() + "-" + transition.getCharacter()).distinct().toList().size() == transitions.size();
+        List<String> t =  transitions.stream().map(transition -> transition.getSymbols().stream().map(ch -> transition.getStateSource().getName() + "-" + ch).toList()).flatMap(l -> l.stream()).toList();
+        if (t.size() != t.stream().distinct().toList().size()){
+            return false;
+        }
+        if (t.size() != alphabet.size()* states.size()){
+            return false;
+        }
+        return true;
     }
 
-    public void determinate(){
+    private Transition getTransitionFromSetByStartDestination(Set<Transition> transitionSet, State start, State destination){
+        for (Transition transition : transitionSet){
+            if (transition.getStateSource().getName().equals(start.getName()) && transition.getStateDestination().getName().equals(destination.getName())){
+                return transition;
+            }
+        }
+        return null;
+    }
+
+    private State getStateByNameFromStates(Set<State> stateSet, String name){
+        for (State s : stateSet){
+            if (s.getName().equals(name)){
+                return s;
+            }
+        }
+        return null;
+    }
+
+    public void determinize(){
         if (checkDetermination()){
             return;
         }
 
         Map<String, Set<String>> epsilonReachabilityMap =  getEpsilonReachabilityMap();
         List<State> initialStates = states.stream().filter(state -> state.isStateBegin()).toList();
-        if (initialStates.isEmpty()){ // No inital states
+        if (initialStates.isEmpty()){
+            // No inital states
             return;
         }
+
         Set<State> newStates = new LinkedHashSet<State>();
         Set<Transition> newTransitions = new LinkedHashSet<Transition>();
 
         List<State> queue = new ArrayList<State>();
 
-        if (initialStates.size() == 1) {
-            State first = initialStates.iterator().next();
-            if (!epsilonReachabilityMap.containsKey(first.getName())){
-                newStates.add(first);
-                queue.add(first);
-            } else {
-                List<State> tmpInitialStates = new ArrayList<>(initialStates); // initialStates is unmodifiable
-                for (String name : epsilonReachabilityMap.get(first.getName())){
-                    tmpInitialStates.add(states.stream().filter(state -> state.getName().equals(name)).findFirst().get());
+        StringBuilder initialStateName = new StringBuilder();
+        List<State> initialReachableStates = new ArrayList<>(initialStates);
+        for (State iState : initialStates){
+            if (epsilonReachabilityMap.containsKey(iState.getName())){
+                for (String name : epsilonReachabilityMap.get(iState.getName())){
+                    initialReachableStates.add(states.stream().filter(state -> state.getName().equals(name)).findFirst().get());
                 }
-                initialStates = tmpInitialStates.stream().sorted(Comparator.comparing(State::getName)).toList();
-                StringBuilder initStateName = new StringBuilder();
-                boolean stateEnd = false;
-                for (State st : initialStates) {
-                    if (initStateName.isEmpty()){
-                        initStateName.append(st.getName());
-                    } else {
-                        initStateName.append(",").append(st.getName());
-                    }
-                    stateEnd = stateEnd || st.isStateEnd();
-                }
-                State initState = new State(initStateName.toString());
-                initState.setStateBegin(true);
-                initState.setStateEnd(stateEnd);
-                newStates.add(initState);
-                queue.add(initState);
             }
-
-        } else {
-            return;
         }
-        Set<State> seenStates = new LinkedHashSet<>();
+
+        if (initialReachableStates.size() == 1){
+            State initState = new State(initialReachableStates.get(0).getName() + "|");
+            initState.setStateBegin(initialReachableStates.get(0).isStateBegin());
+            initState.setStateEnd(initialReachableStates.get(0).isStateEnd());
+            newStates.add(initState);
+
+            queue.add(initialReachableStates.get(0));
+        } else {
+            initialReachableStates = initialReachableStates.stream().sorted(Comparator.comparing(State::getName)).toList();
+
+            boolean stateEnd = initialReachableStates.stream().anyMatch(State::isStateEnd);
+            State initState = new State(String.join("", initialReachableStates.stream().map(State::getName).toList()) + "|");
+            initState.setStateBegin(true);
+            initState.setStateEnd(stateEnd);
+            newStates.add(initState);
+
+            initState = new State(String.join("#", initialReachableStates.stream().map(State::getName).toList()));
+            initState.setStateBegin(true);
+            initState.setStateEnd(stateEnd);
+            queue.add(initState);
+        }
+
+        Set<String> seenStatesNames = new LinkedHashSet<>();
         Set<String> endStatesNamesSet = new LinkedHashSet<>();
         for (State s : states){
             if (s.isStateEnd()){
@@ -239,24 +267,29 @@ public class Automata {
             }
         }
 
+        State hell = new State("PEKLO");
+        hell.setStateBegin(false);
+        hell.setStateEnd(false);
+
         while (!queue.isEmpty()){
             State currState = queue.remove(0);
-            if (seenStates.contains(currState)) {
+            if (seenStatesNames.contains(currState.getName())) {
                 continue;
             } else {
-                seenStates.add(currState);
+                seenStatesNames.add(currState.getName());
             }
             String s = currState.getName();
-            String[] stateNames = s.split(",");
+            String[] stateNames = s.split("#");
             for (String letter : alphabet){
                 List<String> newStateNameList = new ArrayList<>();
                 boolean newStateBegin = false;
                 boolean newStateEnd = false;
                 for (String stateName : stateNames) {
-                    for (Transition t : transitions.stream().filter(transition -> transition.getStateSource().getName().equals(stateName) && transition.getCharacter().equals(letter)).toList()){
+                    for (Transition t : transitions.stream().filter(transition -> transition.getStateSource().getName().equals(stateName) && transition.getSymbols().contains(letter)).toList()){
                         newStateNameList.add(t.getStateDestination().getName());
                         if (epsilonReachabilityMap.containsKey(t.getStateDestination().getName())){
                             newStateNameList.addAll(epsilonReachabilityMap.get(t.getStateDestination().getName()));
+
                             for (String str : epsilonReachabilityMap.get(t.getStateDestination().getName())){
                                 if (endStatesNamesSet.contains(str)){
                                     newStateEnd = true;
@@ -267,31 +300,102 @@ public class Automata {
                     }
                 }
                 newStateNameList = newStateNameList.stream().distinct().sorted(Comparator.comparing(String::toString)).toList();
-                StringBuilder newStateName = new StringBuilder();
+                String newStateName = String.join("#", newStateNameList);
+                String newStateName2 = String.join("", newStateNameList) + "|";
 
-                for (String sN : newStateNameList){
-                    if (!newStateName.isEmpty()){
-                        newStateName.append(",");
-                    }
-                    newStateName.append(sN);
-                }
-
-                if (!newStateName.toString().isEmpty()){
-                    State newState = new State(newStateName.toString());
+                if (!newStateName2.equals("|")){
+                    State newState = new State(newStateName);
                     newState.setStateBegin(newStateBegin);
                     newState.setStateEnd(newStateEnd);
-
-                    newStates.add(newState);
                     queue.add(newState);
-                    newTransitions.add(new Transition(currState, letter, newState));
+
+                    newState = new State(newStateName2);
+                    newState.setStateBegin(newStateBegin);
+                    newState.setStateEnd(newStateEnd);
+                    List<State> tmpList = newStates.stream().filter(tmpState -> tmpState.getName().equals(newStateName2)).toList();
+                    if (!tmpList.isEmpty()){
+                        newState = tmpList.get(0);
+                    }
+                    newStates.add(newState);
+
+                    State tmpCurr = getStateByNameFromStates(newStates, currState.getName().replace("#", "") + "|");
+
+                    Transition tmpTransition = getTransitionFromSetByStartDestination(newTransitions, tmpCurr, newState);
+                    if (tmpTransition == null){
+                        newTransitions.add(new Transition(tmpCurr, letter, newState));
+                    } else {
+                        tmpTransition.addSymbol(letter);
+                    }
+                } else {
+                    //GOTO HELL
+                    if (!newStates.contains(hell)){
+                        newStates.add(hell);
+                        //Loop to add all transitions for hell (loops)
+                        Transition hellTransition = null;
+                        for (String l : alphabet){
+                            if (hellTransition == null){
+                                hellTransition = new Transition(hell, l, hell);
+                            } else {
+                                hellTransition.addSymbol(l);
+                            }
+                        }
+                        newTransitions.add(hellTransition);
+                    }
+                    State tmpCurr = getStateByNameFromStates(newStates, currState.getName().replace("#", "") + "|");
+                    Transition tmpTransition = getTransitionFromSetByStartDestination(newTransitions, tmpCurr, hell);
+                    if (tmpTransition == null){
+                        newTransitions.add(new Transition(tmpCurr, letter, hell));
+                    } else {
+                        tmpTransition.addSymbol(letter);
+                    }
                 }
             }
         }
         states = newStates;
+        // Premenovanie stavov na skratenie mien
+        int c = 0;
+        for (State s : states){
+            if (s.getName().equals("PEKLO")){
+                continue;
+            }
+            s.setStateName("q" + c);
+            c++;
+        }
         transitions = newTransitions;
     }
 
-    public void validate() {
+    public void reverse(){
+        Set<Transition> newTransitions = new LinkedHashSet<Transition>();
+        for (Transition t : transitions){
+            Transition tmpTransition = null;
+            for (String l : t.getSymbols()){
+                if (tmpTransition == null){
+                    tmpTransition = new Transition(t.getStateDestination(), l, t.getStateSource());
+                } else {
+                    tmpTransition.addSymbol(l);
+                }
+            }
+            newTransitions.add(tmpTransition);
+        }
+        transitions = newTransitions;
 
+        for (State s : states){
+            if (s.isStateEnd() != s.isStateBegin()){
+                if (s.isStateBegin()){
+                    s.setStateBegin(false);
+                    s.setStateEnd(true);
+                } else {
+                    s.setStateBegin(true);
+                    s.setStateEnd(false);
+                }
+            }
+        }
+    }
+
+    public void BrzozowskiMinimalize(){
+        this.reverse();
+        this.determinize();
+        this.reverse();
+        this.determinize();
     }
 }
