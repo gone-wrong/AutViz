@@ -1,5 +1,6 @@
 package sk.ukf.autviz.Controllers;
 
+import sk.ukf.autviz.Controllers.View1Controller;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
 import javafx.scene.layout.VBox;
@@ -21,7 +22,6 @@ public class ClientMenuController implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         System.out.println("ClientMenuController Initialize");
         addListeners();
-
     }
 
     private void addListeners() {

@@ -175,6 +175,10 @@ public class DirectedLoopGraphic extends Region {
                     edge.getTransition().setSymbols(newSymbols);
                 });
             }
+            if (Model.getInstance().isDeleteEdgeMode()) {
+                Model.getInstance().getCurrentAutomata().removeTransition(edge.getTransition());
+                Model.getInstance().setAutomataChanged(true);
+            }
         });
 
         getChildren().add(group);

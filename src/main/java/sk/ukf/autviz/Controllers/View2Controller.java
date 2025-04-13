@@ -24,7 +24,7 @@ public class View2Controller implements Initializable {
     private static final double COLUMN_PREF_WIDTH = 120;
     private static final double FIXED_CELL_SIZE = 30;
     private static final double HEADER_HEIGHT = 50;
-    
+
     public AnchorPane view2_parent;
     public AnchorPane table_region;
     public TableView<TransitionRow> transition_table;

@@ -50,6 +50,14 @@ public class View1Controller implements Initializable {
         }
         this.graph = new Graph();
         this.graphModel = graph.getModel();
+
+        Model.getInstance().automataChangedProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal) {
+                updateVisualization();
+                Model.getInstance().setAutomataChanged(false);
+            }
+        });
+
         buildVisualization(automata);
         addButtonListeners();
         addButtonStyles();
@@ -223,27 +231,26 @@ public class View1Controller implements Initializable {
             // update the stored properties.
             cellData.setLayoutX(currentX);
             cellData.setLayoutY(currentY);
-            System.out.println("Updated " + entry.getKey().getName()
-                    + " -> X: " + currentX
-                    + ", Y: " + currentY);
+//            System.out.println("Updated " + entry.getKey().getName()
+//                    + " -> X: " + currentX
+//                    + ", Y: " + currentY);
         }
     }
 
     private void addButtonListeners() {
         delete_edge_button.setOnAction(event -> {
-            System.out.println(Model.getInstance().getCurrentAutomata());
-            for (Map.Entry<State, StateCellData> entry : stateMapping.entrySet()) {
-                State state = entry.getKey();
-                StateCellData cellData = entry.getValue();
-                System.out.println(cellData.getCell().toString());
-                System.out.println("State: " + state.getName()
-                        + " -> X: " + cellData.getLayoutX() + ", Y: " + cellData.getLayoutY());
-            }
-            System.out.println("Graph Cells: " + graphModel.getAllCells());
-            System.out.println("Graph Edges: " + graphModel.getAllEdges());
+            boolean currentMode = Model.getInstance().isDeleteEdgeMode();
+            boolean newMode = !currentMode;
+            Model.getInstance().setDeleteEdgeMode(newMode);
+            System.out.println("DeleteEdgeMode is " + newMode);
         });
 
         add_edge_button.setOnAction(event -> {
+            StateCellData sourceData = stateMapping.get(selectedEdgeSource);
+            if (sourceData != null) {
+                Region node = sourceData.getGraphicNode();
+                node.setStyle("");
+            }
             selectedEdgeSource = null;
             boolean currentMode = Model.getInstance().isAddEdgeMode();
             boolean newMode = !currentMode;
@@ -273,11 +280,17 @@ public class View1Controller implements Initializable {
             dialog.setContentText("Meno stavu:");
             dialog.getEditor().setPromptText("...");
 
-            dialog.showAndWait().ifPresent(name -> {
-                if (!name.trim().isEmpty()) {
-                    newStateName = name.trim();
-                }
-            });
+            Optional<String> result = dialog.showAndWait();
+            if (result.isEmpty()) {
+                return;
+            }
+
+            String name = result.get();
+            if (!name.trim().isEmpty()) {
+                newStateName = name.trim();
+            } else {
+                newStateName = "";
+            }
 
             State newState = new State(newStateName);
 
@@ -295,16 +308,18 @@ public class View1Controller implements Initializable {
 
     private void processStateCellClick(State clickedState) {
         if (selectedEdgeSource == null) {
-            // First click; set as source.
             selectedEdgeSource = clickedState;
             System.out.println("Edge source selected: " + selectedEdgeSource.getName());
-            // Optionally, you could change the style of the selected cell here.
+            StateCellData cellData = stateMapping.get(selectedEdgeSource);
+            if (cellData != null) {
+                Region node = cellData.getGraphicNode();
+                node.setStyle("-fx-border-color: red;-fx-background-radius: 51%;-fx-border-radius: 50%;");
+            }
         } else {
-            // Second click; this is the target.
             State source = selectedEdgeSource;
             State target = clickedState;
             System.out.println("Edge target selected: " + target.getName());
-            // Prompt the user for the transition symbols.
+
             TextInputDialog dialog = new TextInputDialog();
             dialog.setTitle("Add New Edge");
             dialog.setHeaderText("Enter symbols for the transition");
@@ -312,13 +327,15 @@ public class View1Controller implements Initializable {
             dialog.getEditor().setPromptText("Enter symbols here...");
             Optional<String> result = dialog.showAndWait();
             result.ifPresent(symbols -> {
-                // Create the new transition.
                 Transition newTransition = new Transition(source, symbols, target);
                 Model.getInstance().getCurrentAutomata().addTransition(newTransition);
-                // Rebuild (or update) the visualization.
                 updateVisualization();
             });
-            // Clear temporary selections and turn off edge addition mode.
+            StateCellData sourceData = stateMapping.get(selectedEdgeSource);
+            if (sourceData != null) {
+                Region node = sourceData.getGraphicNode();
+                node.setStyle("");
+            }
             selectedEdgeSource = null;
             Model.getInstance().setAddEdgeMode(false);
             System.out.println("Edge addition mode deactivated.");
@@ -327,6 +344,11 @@ public class View1Controller implements Initializable {
 
     private void attachClickHandlers(Region graphicNode, State state) {
         graphicNode.setOnMouseClicked(event -> {
+            if (Model.getInstance().isAddEdgeMode()) {
+                processStateCellClick(state);
+                event.consume();
+            }
+
             if (Model.getInstance().isDeleteStateMode()) {
                 System.out.println("Deleting state: " + state.getName());
                 Automata automata = Model.getInstance().getCurrentAutomata();
@@ -339,12 +361,6 @@ public class View1Controller implements Initializable {
             }
         });
 
-        graphicNode.setOnMouseClicked(event -> {
-            if (Model.getInstance().isAddEdgeMode()) {
-                processStateCellClick(state);
-                event.consume();
-            }
-        });
     }
 
     private void addButtonStyles() {
@@ -372,4 +388,5 @@ public class View1Controller implements Initializable {
                         .otherwise("")
         );
     }
+
 }

@@ -1,6 +1,9 @@
 package sk.ukf.autviz.Models;
 
 import java.util.*;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class Automata {
     private Set<String> alphabet = new LinkedHashSet<String>();
@@ -72,13 +75,23 @@ public class Automata {
     }
 
     public void removeTransition(Transition transition) {
-        for (Iterator<Transition> entry = this.getTransitions().iterator(); entry.hasNext();) {
-            Transition transitions = entry.next();
-            if (transitions.getStateSource().getName().equals(transition.getStateSource().getName()) &&
-                    transitions.getCharacter().equals(transition.getCharacter()) &&
-                    transitions.getStateDestination().getName().equals(transition.getStateDestination().getName())) {
-                entry.remove();
-                return;
+        boolean removed = false;
+        Iterator<Transition> iterator = this.getTransitions().iterator();
+        while (iterator.hasNext()) {
+            Transition t = iterator.next();
+            if (t.getStateSource().getName().equals(transition.getStateSource().getName()) &&
+                    t.getCharacter().equals(transition.getCharacter()) &&
+                    t.getStateDestination().getName().equals(transition.getStateDestination().getName())) {
+                iterator.remove();
+                removed = true;
+                break;
+            }
+        }
+
+        if (removed) {
+            Set<Transition> remainingTransitions = this.getTransitions();
+            for (Transition t : remainingTransitions) {
+                t.updateOppositeStatus(remainingTransitions);
             }
         }
     }

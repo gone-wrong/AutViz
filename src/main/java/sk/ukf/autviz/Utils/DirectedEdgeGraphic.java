@@ -4,10 +4,8 @@ import com.fxgraph.graph.Graph;
 import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.StringProperty;
 import javafx.scene.Group;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.Region;
@@ -59,6 +57,10 @@ public class DirectedEdgeGraphic extends Region {
                 dialog.setContentText("Zadaj nové symboly (oddelené čiarkou):");
                 Optional<String> result = dialog.showAndWait();
                 result.ifPresent(newSymbols -> edge.getTransition().setSymbols(newSymbols));
+            }
+            if (Model.getInstance().isDeleteEdgeMode()) {
+                Model.getInstance().getCurrentAutomata().removeTransition(edge.getTransition());
+                Model.getInstance().setAutomataChanged(true);
             }
         });
 

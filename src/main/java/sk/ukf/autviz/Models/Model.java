@@ -12,6 +12,8 @@ public class Model {
     private final BooleanProperty deleteStateMode = new SimpleBooleanProperty(false);
     private final BooleanProperty deleteEdgeMode = new SimpleBooleanProperty(false);
     private final BooleanProperty addEdgeMode = new SimpleBooleanProperty(false);
+    private final BooleanProperty automataChanged = new SimpleBooleanProperty(false);
+
 
     private Model() {
         this.viewFactory = new ViewFactory();
@@ -109,5 +111,15 @@ public class Model {
         deleteStateMode.set(false);
         deleteEdgeMode.set(false);
         addEdgeMode.set(false);
+    }
+
+    public BooleanProperty automataChangedProperty() {
+        return automataChanged;
+    }
+    public boolean isAutomataChanged() {
+        return automataChanged.get();
+    }
+    public void setAutomataChanged(boolean value) {
+        automataChanged.set(value);
     }
 }

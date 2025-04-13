@@ -98,3 +98,31 @@
 .bottom_container Button FontAwesomeIconView {
     -fx-fill: #FFFFFF;
 }
+
+.left_container HBox {
+    -fx-alignment: center;
+    -fx-spacing: 20px;
+    -fx-padding: 10px 0px 10px 0px;
+}
+
+.left_container HBox Button {
+    -fx-background-color: #132A13;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 16px;
+    -fx-background-radius: 30;
+    -fx-cursor: hand;
+
+    -fx-min-width: 40px;
+    -fx-min-height: 40px;
+    -fx-max-width: 40px;
+    -fx-max-height: 40px;
+}
+
+.left_container HBox Button FontAwesomeIconView {
+    -fx-fill: #FFFFFF;
+    -fx-font-size: 20px;
+}
+
+.left_container HBox Button:hover {
+    -fx-background-color: #1e3b2f;
+}
