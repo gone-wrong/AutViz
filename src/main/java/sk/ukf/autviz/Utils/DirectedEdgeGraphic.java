@@ -45,7 +45,7 @@ public class DirectedEdgeGraphic extends Region {
 
         text.textProperty().bind(edge.getTransition().characterProperty());
         text.getStyleClass().add("edge-text");
-
+        editRect.setWidth(30);
         rebuildGraphic();
 
         edge.getTransition().hasOppositeProperty().addListener(
@@ -68,6 +68,35 @@ public class DirectedEdgeGraphic extends Region {
 
 
     private void rebuildGraphic() {
+        if (line != null) {
+            line.startXProperty().unbind();
+            line.startYProperty().unbind();
+            line.endXProperty().unbind();
+            line.endYProperty().unbind();
+        }
+        if (curve != null) {
+            curve.startXProperty().unbind();
+            curve.startYProperty().unbind();
+            curve.endXProperty().unbind();
+            curve.endYProperty().unbind();
+            curve.controlX1Property().unbind();
+            curve.controlY1Property().unbind();
+            curve.controlX2Property().unbind();
+            curve.controlY2Property().unbind();
+        }
+        arrowLine1.startXProperty().unbind();
+        arrowLine1.startYProperty().unbind();
+        arrowLine1.endXProperty().unbind();
+        arrowLine1.endYProperty().unbind();
+
+        arrowLine2.startXProperty().unbind();
+        arrowLine2.startYProperty().unbind();
+        arrowLine2.endXProperty().unbind();
+        arrowLine2.endYProperty().unbind();
+
+        text.xProperty().unbind();
+        text.yProperty().unbind();
+
         group.getChildren().clear();
 
         final DoubleBinding sourceX = edge.getSource().getXAnchor(graph, edge);
@@ -209,13 +238,12 @@ public class DirectedEdgeGraphic extends Region {
             editRect.setFill(Color.TRANSPARENT);
             // debugging
             editRect.setStroke(Color.RED);
-            editRect.setHeight(30);
             DoubleBinding edgeLength = Bindings.createDoubleBinding(() -> {
                 double dxE = targetX.get() - sourceX.get();
                 double dyE = targetY.get() - sourceY.get();
                 return Math.hypot(dxE, dyE);
             }, sourceX, sourceY, targetX, targetY);
-            editRect.widthProperty().bind(edgeLength.divide(4));
+            editRect.heightProperty().bind(edgeLength.divide(4));
 
             editRect.xProperty().bind(controlX.subtract(editRect.widthProperty().divide(2)));
             editRect.yProperty().bind(controlY.subtract(editRect.heightProperty().divide(2)));
@@ -225,9 +253,10 @@ public class DirectedEdgeGraphic extends Region {
                 double dyE = targetY.get() - sourceY.get();
                 return Math.toDegrees(Math.atan2(dyE, dxE));
             }, sourceX, sourceY, targetX, targetY);
-            editRect.rotateProperty().bind(angle);
+            editRect.rotateProperty().bind(angle.subtract(90));
 
             group.getChildren().add(editRect);
+            recalculateTextBounds.run();
 
         } else {
             line = new Line();
@@ -329,6 +358,7 @@ public class DirectedEdgeGraphic extends Region {
             }, sourceX, sourceY, targetX, targetY);
             editRect.rotateProperty().bind(angle.subtract(90));
             group.getChildren().add(editRect);
+            recalculateTextBounds.run();
         }
 
         getChildren().setAll(group);

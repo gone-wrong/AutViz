@@ -1,39 +1,36 @@
-/* Celkový vzhľad tabuľky */
+
 .table-view {
     -fx-fixed-cell-size: 30px;
     -fx-background-color: transparent;
     -fx-padding: 10;
     -fx-focus-color: transparent;
     -fx-faint-focus-color: transparent;
-    -fx-table-cell-border-color: #CCCCCC;  /* farba čiar medzi bunkami */
+    -fx-table-cell-border-color: #CCCCCC;
 }
 
-/* Hlavička stĺpcov */
 .table-view .column-header-background {
     -fx-background-color: #2A2A2A;
     -fx-pref-height: 30px;
 }
 
 .table-view .column-header, .table-view .filler {
-    -fx-background-color: white;     /* biely text pre lepšiu čitateľnosť */
+    -fx-background-color: white;
     -fx-alignment: CENTER;
     -fx-font-size: 14px;
     -fx-padding: 8 4 8 4;
     -fx-border-color: #CCCCCC;
-    -fx-border-width: 0 0 1 0;  /* dolná čiara v hlavičke */
+    -fx-border-width: 0 0 1 0;
 }
 
-/* Bunky tabuľky */
 .table-cell {
     -fx-border-color: #CCCCCC;
-    -fx-border-width: 0 1 0 0;  /* zobrazenie zvislej čiary na pravej strane bunky */
+    -fx-border-width: 0 1 0 0;
     -fx-padding: 5 10 5 10;
     -fx-font-size: 13px;
     -fx-text-fill: #333333;
     -fx-alignment: center;
 }
 
-/* Striedanie farieb riadkov pre lepšiu prehľadnosť */
 .table-row-cell:odd {
     -fx-background-color: #F9F9F9;
 }
@@ -42,7 +39,25 @@
     -fx-background-color: white;
 }
 
-/* Zvýraznenie riadku pri hover */
 .table-row-cell:hover {
     -fx-background-color: #DCDCDC;
+}
+
+.header_hbox {
+    -fx-background-color: #999999;
+    -fx-spacing: 50;
+    -fx-alignment: center;
+}
+
+.header_hbox Button {
+    -fx-background-color: #132A13;
+    -fx-text-fill: #FFFFFF;
+    -fx-font-size: 14px;
+    -fx-background-radius: 5;
+    -fx-padding: 8 16 8 16;
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.2), 4, 0.0, 0, 2);
+    -fx-cursor: hand;
+}
+
+.header_hbox Button:hover {
 }

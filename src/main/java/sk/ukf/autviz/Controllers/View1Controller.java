@@ -4,16 +4,14 @@ package sk.ukf.autviz.Controllers;
 import com.fxgraph.cells.AbstractCell;
 import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.ICell;
-import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.Region;
 import javafx.scene.shape.Rectangle;
-import sk.ukf.autviz.Models.Automata;
-import sk.ukf.autviz.Models.State;
-import sk.ukf.autviz.Models.Transition;
-import sk.ukf.autviz.Models.Model;
+import sk.ukf.autviz.Models.*;
 import sk.ukf.autviz.Utils.CircleCell;
 import sk.ukf.autviz.Utils.DirectedEdge;
 import sk.ukf.autviz.Utils.DirectedLoop;
@@ -21,11 +19,11 @@ import sk.ukf.autviz.Utils.DirectedLoop;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class View1Controller implements Initializable {
 
-    @FXML
     public AnchorPane view1_parent;
     public AnchorPane graph_region;
     public Button add_state_button;
@@ -36,7 +34,11 @@ public class View1Controller implements Initializable {
 
     private Graph graph;
     private com.fxgraph.graph.Model graphModel; // model z FXGraph
-    private Map<State, ICell> stateMapping = new HashMap<>();
+    private Map<State, StateCellData> stateMapping = new HashMap<>();
+
+    private String newStateName = "";
+
+    private State selectedEdgeSource = null;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -49,26 +51,30 @@ public class View1Controller implements Initializable {
         this.graph = new Graph();
         this.graphModel = graph.getModel();
         buildVisualization(automata);
-
         addButtonListeners();
+        addButtonStyles();
     }
 
     public void buildVisualization(Automata automata) {
-        graph_region.getChildren().clear();
         graph.beginUpdate();
 
-        stateMapping.clear();
-        // naplnenie mapy pre prepojenie názvov stavov s grafickými bunkami
-        for (State s : automata.getStates()) {
-            AbstractCell cell = new CircleCell(s, true);
+        // naplnenie mapy pre prepojenie stavov s info ich grafických buniek
+        for (State state : automata.getStates()) {
+            AbstractCell cell = new CircleCell(state, true);
             graphModel.addCell(cell);
-            stateMapping.put(s, cell);
+            Region graphicNode = cell.getGraphic(graph);
+            StateCellData cellData = new StateCellData(cell, graphicNode);
+            stateMapping.put(state, cellData);
+
+            attachClickHandlers(graphicNode, state);
         }
 
         for (Transition t : automata.getTransitions()) {
-            ICell source = stateMapping.get(t.getStateSource());
-            ICell target = stateMapping.get(t.getStateDestination());
-            if (source != null && target != null) {
+            StateCellData sourceData = stateMapping.get(t.getStateSource());
+            StateCellData targetData = stateMapping.get(t.getStateDestination());
+            if (sourceData != null && targetData != null) {
+                ICell source = sourceData.getCell();
+                ICell target = targetData.getCell();
                 if (t.getStateSource().equals(t.getStateDestination())) {
                     DirectedLoop dLoop = new DirectedLoop(source, t);
                     dLoop.textProperty().set(t.getCharacter());
@@ -98,6 +104,51 @@ public class View1Controller implements Initializable {
         graph_region.setClip(clip);
     }
 
+    public void updateVisualization() {
+        updateAllStatePositions();
+        Automata automata = Model.getInstance().getCurrentAutomata();
+        graphModel.clear();
+        graph.beginUpdate();
+
+        for (State s : automata.getStates()) {
+            StateCellData cellData = stateMapping.get(s);
+            // State je v Modeli ale nie je v stateMapping = bol pridany v inom view
+            // vytvorime mu stateMapping a vsetko potrebne na vizualizaciu
+            if (cellData == null) {
+                AbstractCell cell = new CircleCell(s, true);
+                graphModel.addCell(cell);
+                Region graphicNode = cell.getGraphic(graph);
+                attachClickHandlers(graphicNode, s);
+                cellData = new StateCellData(cell, graphicNode);
+                stateMapping.put(s, cellData);
+            } else {
+                Region graphicNode = cellData.getGraphicNode();
+                graphicNode.setLayoutX(cellData.getLayoutX());
+                graphicNode.setLayoutY(cellData.getLayoutY());
+                graphModel.addCell(cellData.getCell());
+            }
+        }
+
+        for (Transition t : automata.getTransitions()) {
+            StateCellData sourceData = stateMapping.get(t.getStateSource());
+            StateCellData targetData = stateMapping.get(t.getStateDestination());
+            if (sourceData != null && targetData != null) {
+                ICell source = sourceData.getCell();
+                ICell target = targetData.getCell();
+                if (t.getStateSource().equals(t.getStateDestination())) {
+                    DirectedLoop dLoop = new DirectedLoop(source, t);
+                    dLoop.textProperty().set(t.getCharacter());
+                    graphModel.addEdge(dLoop);
+                } else {
+                    DirectedEdge dEdge = new DirectedEdge(source, target, t);
+                    graphModel.addEdge(dEdge);
+                }
+            }
+        }
+
+        graph.endUpdate();
+    }
+
     private Automata createSampleAutomaton() {
         Automata a = new Automata();
 
@@ -113,7 +164,6 @@ public class View1Controller implements Initializable {
         q2.setStateEnd(true);
         q4.setStateEnd(true);
 
-        // Pridanie stavov do automatu
         a.addState(q0);
         a.addState(q1);
         a.addState(q4);
@@ -141,16 +191,14 @@ public class View1Controller implements Initializable {
 //        a.addState(q13);
 //        a.addState(q14);
 
-        // Pridanie symbolov abecedy
         a.addAlphabet("a");
         a.addAlphabet("b");
         a.addAlphabet("c");
 
-        // Definovanie prechodov (napr. vytvoríme cyklus)
-        a.addTransition(new Transition(q2, "aaaaaa", q0));
-        a.addTransition(new Transition(q0, "b", q1));
         // testovanie curved DirectedEdge
         a.addTransition(new Transition(q1, "b", q0));
+        a.addTransition(new Transition(q2, "aaaaaa", q0));
+        a.addTransition(new Transition(q0, "b", q1));
         a.addTransition(new Transition(q0, "b", q3));
         a.addTransition(new Transition(q0, "a", q3));
         a.addTransition(new Transition(q1, "a", q3));
@@ -165,16 +213,163 @@ public class View1Controller implements Initializable {
         return a;
     }
 
+    public void updateAllStatePositions() {
+        for (Map.Entry<State, StateCellData> entry : stateMapping.entrySet()) {
+            StateCellData cellData = entry.getValue();
+            Region graphicNode = cellData.getCell().getGraphic(graph);
+            // current layout positions.
+            double currentX = graphicNode.getLayoutX();
+            double currentY = graphicNode.getLayoutY();
+            // update the stored properties.
+            cellData.setLayoutX(currentX);
+            cellData.setLayoutY(currentY);
+            System.out.println("Updated " + entry.getKey().getName()
+                    + " -> X: " + currentX
+                    + ", Y: " + currentY);
+        }
+    }
+
     private void addButtonListeners() {
+        delete_edge_button.setOnAction(event -> {
+            System.out.println(Model.getInstance().getCurrentAutomata());
+            for (Map.Entry<State, StateCellData> entry : stateMapping.entrySet()) {
+                State state = entry.getKey();
+                StateCellData cellData = entry.getValue();
+                System.out.println(cellData.getCell().toString());
+                System.out.println("State: " + state.getName()
+                        + " -> X: " + cellData.getLayoutX() + ", Y: " + cellData.getLayoutY());
+            }
+            System.out.println("Graph Cells: " + graphModel.getAllCells());
+            System.out.println("Graph Edges: " + graphModel.getAllEdges());
+        });
+
+        add_edge_button.setOnAction(event -> {
+            selectedEdgeSource = null;
+            boolean currentMode = Model.getInstance().isAddEdgeMode();
+            boolean newMode = !currentMode;
+            Model.getInstance().setAddEdgeMode(newMode);
+            System.out.println("AddEdgeMode is " + newMode);
+        });
+
         edit_mode_button.setOnAction(event -> {
             boolean currentMode = Model.getInstance().isEditMode();
             boolean newMode = !currentMode;
             Model.getInstance().setEditMode(newMode);
-            System.out.println("Edit mode is now " + (newMode ? "ON" : "OFF"));
+            System.out.println("EditMode is " + newMode);
+        });
+
+        delete_state_button.setOnAction(event -> {
+            boolean currentMode = Model.getInstance().isDeleteStateMode();
+            boolean newMode = !currentMode;
+            Model.getInstance().setDeleteStateMode(newMode);
+            System.out.println("DeleteStateMode is " + newMode);
         });
 
         add_state_button.setOnAction(event -> {
-            System.out.println(Model.getInstance().getCurrentAutomata());
+            Model.getInstance().disableModes();
+            javafx.scene.control.TextInputDialog dialog = new javafx.scene.control.TextInputDialog();
+            dialog.setTitle("Add New State");
+            dialog.setHeaderText("Zadaj meno pre nový stav:");
+            dialog.setContentText("Meno stavu:");
+            dialog.getEditor().setPromptText("...");
+
+            dialog.showAndWait().ifPresent(name -> {
+                if (!name.trim().isEmpty()) {
+                    newStateName = name.trim();
+                }
+            });
+
+            State newState = new State(newStateName);
+
+            Model.getInstance().getCurrentAutomata().addState(newState);
+
+            AbstractCell newStateCell = new CircleCell(newState, true);
+
+            Region graphicNode = newStateCell.getGraphic(graph);
+            attachClickHandlers(graphicNode, newState);
+            StateCellData cellData = new StateCellData(newStateCell, graphicNode);
+            stateMapping.put(newState, cellData);
+            updateVisualization();
         });
+    }
+
+    private void processStateCellClick(State clickedState) {
+        if (selectedEdgeSource == null) {
+            // First click; set as source.
+            selectedEdgeSource = clickedState;
+            System.out.println("Edge source selected: " + selectedEdgeSource.getName());
+            // Optionally, you could change the style of the selected cell here.
+        } else {
+            // Second click; this is the target.
+            State source = selectedEdgeSource;
+            State target = clickedState;
+            System.out.println("Edge target selected: " + target.getName());
+            // Prompt the user for the transition symbols.
+            TextInputDialog dialog = new TextInputDialog();
+            dialog.setTitle("Add New Edge");
+            dialog.setHeaderText("Enter symbols for the transition");
+            dialog.setContentText("Symbols (e.g., a, b):");
+            dialog.getEditor().setPromptText("Enter symbols here...");
+            Optional<String> result = dialog.showAndWait();
+            result.ifPresent(symbols -> {
+                // Create the new transition.
+                Transition newTransition = new Transition(source, symbols, target);
+                Model.getInstance().getCurrentAutomata().addTransition(newTransition);
+                // Rebuild (or update) the visualization.
+                updateVisualization();
+            });
+            // Clear temporary selections and turn off edge addition mode.
+            selectedEdgeSource = null;
+            Model.getInstance().setAddEdgeMode(false);
+            System.out.println("Edge addition mode deactivated.");
+        }
+    }
+
+    private void attachClickHandlers(Region graphicNode, State state) {
+        graphicNode.setOnMouseClicked(event -> {
+            if (Model.getInstance().isDeleteStateMode()) {
+                System.out.println("Deleting state: " + state.getName());
+                Automata automata = Model.getInstance().getCurrentAutomata();
+                automata.getTransitions().removeIf(t ->
+                        t.getStateSource().equals(state) || t.getStateDestination().equals(state)
+                );
+                automata.removeState(state);
+                stateMapping.remove(state);
+                updateVisualization();
+            }
+        });
+
+        graphicNode.setOnMouseClicked(event -> {
+            if (Model.getInstance().isAddEdgeMode()) {
+                processStateCellClick(state);
+                event.consume();
+            }
+        });
+    }
+
+    private void addButtonStyles() {
+        edit_mode_button.styleProperty().bind(
+                javafx.beans.binding.Bindings.when(Model.getInstance().editModeProperty())
+                        .then("-fx-background-color: #66cc66; -fx-text-fill: white;")
+                        .otherwise("")
+        );
+
+        delete_state_button.styleProperty().bind(
+                javafx.beans.binding.Bindings.when(Model.getInstance().deleteStateModeProperty())
+                        .then("-fx-background-color: #66cc66; -fx-text-fill: white;")
+                        .otherwise("")
+        );
+
+        delete_edge_button.styleProperty().bind(
+                javafx.beans.binding.Bindings.when(Model.getInstance().deleteEdgeModeProperty())
+                        .then("-fx-background-color: #66cc66; -fx-text-fill: white;")
+                        .otherwise("")
+        );
+
+        add_edge_button.styleProperty().bind(
+                javafx.beans.binding.Bindings.when(Model.getInstance().addEdgeModeProperty())
+                        .then("-fx-background-color: #66cc66; -fx-text-fill: white;")
+                        .otherwise("")
+        );
     }
 }

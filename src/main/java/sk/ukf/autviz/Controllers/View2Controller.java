@@ -6,9 +6,11 @@ import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
+import javafx.scene.layout.AnchorPane;
 import sk.ukf.autviz.Models.Automata;
 import sk.ukf.autviz.Models.Model;
 import sk.ukf.autviz.Models.State;
@@ -22,8 +24,16 @@ public class View2Controller implements Initializable {
     private static final double COLUMN_PREF_WIDTH = 120;
     private static final double FIXED_CELL_SIZE = 30;
     private static final double HEADER_HEIGHT = 50;
-
+    
+    public AnchorPane view2_parent;
+    public AnchorPane table_region;
     public TableView<TransitionRow> transition_table;
+    public Button add_state_button;
+    public Button delete_state_button;
+    public Button add_edge_button;
+    public Button delete_edge_button;
+    public Button edit_mode_button;
+
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {

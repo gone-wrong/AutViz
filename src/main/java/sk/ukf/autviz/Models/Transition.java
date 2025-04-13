@@ -91,7 +91,6 @@ public class Transition {
     }
 
     public void updateOppositeStatus(Set<Transition> allTransitions) {
-        // Check if there exists a transition t such that t goes from our destination to our source.
         boolean foundOpposite = allTransitions.stream().anyMatch(t ->
                 t != this &&
                         t.getStateSource().getName().equals(this.getStateDestination().getName()) &&

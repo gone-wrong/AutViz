@@ -3,6 +3,7 @@ package sk.ukf.autviz.Controllers;
 import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.ICell;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.shape.Rectangle;
@@ -20,7 +21,13 @@ import java.util.*;
 public class View3Controller implements Initializable {
 
     public AnchorPane view3_parent;
+    public Button add_state_button;
+    public Button delete_state_button;
+    public Button add_edge_button;
+    public Button delete_edge_button;
+    public Button edit_mode_button;
 
+    public AnchorPane tree_region;
     private Graph graph;
     private com.fxgraph.graph.Model graphModel; // FXGraph model
 
@@ -46,10 +53,10 @@ public class View3Controller implements Initializable {
         }
 
         if (beginStates.size() > 1) {
-            State dummy = new State("root");
+            State dummy = new State("dummyroot");
             StateTreeNode root = new StateTreeNode(dummy, true, null);
             for (State s : beginStates) {
-                root.addChild(buildStateTreeRecursive(s, automata, expanded, null));
+                root.addChild(buildStateTreeRecursive(s, automata, expanded, new Transition(dummy, "ε", s)));
             }
             return root;
         } else {
@@ -93,12 +100,12 @@ public class View3Controller implements Initializable {
         AnchorPane.setBottomAnchor(pane, 0.0);
         AnchorPane.setLeftAnchor(pane, 0.0);
         AnchorPane.setRightAnchor(pane, 0.0);
-        view3_parent.getChildren().add(pane);
+        tree_region.getChildren().add(pane);
 
         Rectangle clip = new Rectangle();
-        clip.widthProperty().bind(view3_parent.widthProperty());
-        clip.heightProperty().bind(view3_parent.heightProperty());
-        view3_parent.setClip(clip);
+        clip.widthProperty().bind(tree_region.widthProperty());
+        clip.heightProperty().bind(tree_region.heightProperty());
+        tree_region.setClip(clip);
     }
 
     private void addStateTreeNodes(StateTreeNode node, Map<StateTreeNode, ICell> mapping) {
@@ -138,7 +145,6 @@ public class View3Controller implements Initializable {
             double endX = posWrapper.value;
             double parentX = (startX + endX) / 2.0;
             double parentY = level * VERTICAL_SPACING;
-
             cell.getGraphic(null).setLayoutX(parentX);
             cell.getGraphic(null).setLayoutY(parentY);
         } else {
