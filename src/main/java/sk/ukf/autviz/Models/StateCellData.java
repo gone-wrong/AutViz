@@ -12,7 +12,7 @@ public class StateCellData {
     public StateCellData(ICell cell, Region graphicNode) {
         this.cell = cell;
         this.graphicNode = graphicNode;
-        // Capture the initial layout positions (likely 0,0)
+
         this.layoutX = graphicNode.getLayoutX();
         this.layoutY = graphicNode.getLayoutY();
     }

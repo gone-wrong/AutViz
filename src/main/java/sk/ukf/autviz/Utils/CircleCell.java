@@ -2,6 +2,7 @@ package sk.ukf.autviz.Utils;
 
 import com.fxgraph.cells.AbstractCell;
 import com.fxgraph.graph.Graph;
+import javafx.beans.binding.Bindings;
 import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.*;
@@ -28,11 +29,19 @@ public class CircleCell extends AbstractCell {
     private final Circle endIndicator;
 
     // state Objekt typu State, ktorý obsahuje názov a príznaky.
-    public CircleCell(State state, boolean showBeginIndicator) {
+    public CircleCell(State state, boolean customStyle) {
         this.state = state;
         // kruh pre stav.
         Circle circle = new Circle(30);
-        circle.setFill(Color.LIGHTBLUE);
+        if (customStyle) {
+            circle.fillProperty().bind(
+                    Bindings.when(state.isActiveProperty())
+                            .then(Color.GREEN)
+                            .otherwise(Color.LIGHTBLUE)
+            );
+        } else {
+            circle.setFill(Color.LIGHTBLUE);
+        }
         circle.setStroke(Color.DARKBLUE);
         circle.setStrokeWidth(1);
 
@@ -55,7 +64,7 @@ public class CircleCell extends AbstractCell {
         beginIndicator.setStroke(Color.BLACK);
         beginIndicator.setStrokeWidth(2);
         beginIndicator.setTranslateX(-30);
-        if (showBeginIndicator) {
+        if (customStyle) {
             beginIndicator.visibleProperty().bind(state.stateBeginProperty());
             basePane.getChildren().add(beginIndicator);
         }

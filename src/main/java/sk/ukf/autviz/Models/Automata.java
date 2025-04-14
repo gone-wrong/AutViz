@@ -1,14 +1,21 @@
 package sk.ukf.autviz.Models;
 
 import java.util.*;
+
+import javafx.util.Pair;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
+
 
 public class Automata {
     private Set<String> alphabet = new LinkedHashSet<String>();
     private Set<State> states = new LinkedHashSet<State>();
     private Set<Transition> transitions = new LinkedHashSet<Transition>();
+
+    private final StringProperty alphabetProperty = new SimpleStringProperty();
 
     public Automata() {
         this.alphabet.clear();
@@ -16,14 +23,18 @@ public class Automata {
         this.transitions.clear();
     }
 
+    private void updateAlphabetProperty() {
+        String joined = String.join(", ", alphabet);
+        alphabetProperty.set(joined);
+    }
+
     public void updateAlphabet() {
-        // Clear the alphabet
         alphabet.clear();
 
-        // Iterate over all transitions and collect their symbols.
         for (Transition t : transitions) {
             alphabet.addAll(t.getSymbols());
         }
+        updateAlphabetProperty();
     }
 
     public void addState(State state) {
@@ -60,6 +71,10 @@ public class Automata {
 
         transitions.add(newTransition);
         updateAlphabet();
+    }
+
+    public StringProperty alphabetProperty() {
+        return alphabetProperty;
     }
 
     public Set<String> getAlphabet() {
@@ -162,7 +177,7 @@ public class Automata {
         return reachabilityMap;
     }
 
-    private boolean checkDetermination(){
+    public boolean checkDetermination(){
         if (transitions.stream().anyMatch(transition -> transition.getSymbols().contains("ε"))){
             return false;
         }
@@ -311,7 +326,7 @@ public class Automata {
                         tmpTransition.addSymbol(letter);
                     }
                 } else {
-                    //GOTO HELL
+                    //Go to HELL
                     if (!newStates.contains(hell)){
                         newStates.add(hell);
                         //Loop to add all transitions for hell (loops)
@@ -381,5 +396,119 @@ public class Automata {
         this.determinize();
         this.reverse();
         this.determinize();
+    }
+
+    public boolean isWordLegal(String word){
+        List<State> initial = states.stream().filter(State::isStateBegin).toList();
+        List<Set<State>> compute = new ArrayList<>();
+        compute.add(new HashSet<>(initial));
+
+        Map<String, Set<String>> epsilonReachabilityMap = getEpsilonReachabilityMap();
+
+        for (State s : initial){
+            if (epsilonReachabilityMap.containsKey(s.getName())){
+                for (String str : epsilonReachabilityMap.get(s.getName())){
+                    compute.get(compute.size() - 1).add(states.stream().filter(st -> st.getName().equals(str)).toList().get(0));
+                }
+            }
+        }
+
+        for (char letter : word.toCharArray()){
+            Set<State> nextStates = new LinkedHashSet<>();
+            for (State s : compute.get(compute.size() - 1)){
+                nextStates.addAll(transitions.stream().filter(t -> t.getStateSource().getName().equals(s.getName()) && t.getSymbols().contains(String.valueOf(letter))).map(Transition::getStateDestination).toList());
+            }
+
+            Set<State> nextStatesCopy = new LinkedHashSet<>(nextStates);
+            for (State s : nextStatesCopy){
+                if (epsilonReachabilityMap.containsKey(s.getName())){
+                    for (String str : epsilonReachabilityMap.get(s.getName())){
+                        nextStates.add(states.stream().filter(st -> st.getName().equals(str)).toList().get(0));
+                    }
+                }
+            }
+
+            compute.add(nextStates);
+        }
+        return compute.get(compute.size() - 1).stream().anyMatch(State::isStateEnd);
+    }
+
+    private List<State> getWordPathRec(String word, State state, Set<String> epsilonTransitions){
+        List<State> result = new ArrayList<>();
+        result.add(state);
+        if (word.isEmpty()){
+            if (state.isStateEnd()){
+                return result;
+            }
+        } else {
+            String letter = String.valueOf(word.charAt(0));
+            List<Transition> availableTransitions = transitions.stream().filter(t -> t.getStateSource().getName().equals(state.getName()) && t.getSymbols().contains(letter)).toList();
+            for (Transition t : availableTransitions){
+                List<State> tmpResult = getWordPathRec(word.substring(1), t.getStateDestination(), new LinkedHashSet<>());
+                if (tmpResult != null){
+                    result.addAll(tmpResult);
+                    return result;
+                }
+            }
+        }
+
+        epsilonTransitions.add(state.getName());
+        List<Transition> availableEpsilonTransitions = transitions.stream().filter(t -> t.getStateSource().getName().equals(state.getName()) && t.getSymbols().contains("ε")).toList();
+        for (Transition t : availableEpsilonTransitions){
+            if (epsilonTransitions.contains(t.getStateDestination().getName())){
+                continue;
+            }
+            List<State> tmpResult = getWordPathRec(word, t.getStateDestination(), epsilonTransitions);
+            if (tmpResult != null){
+                result.addAll(tmpResult);
+                return result;
+            }
+        }
+
+        return null;
+    }
+
+    private Pair<List<State>, List<String>> getWholePathRec(String word, State state, Set<String> epsilonTransitions, List<State> currStateList, List<String> currWordList){
+        Pair<List<State>, List<String>> result = new Pair<>(new ArrayList<>(), new ArrayList<>());
+        currStateList.add(state);
+        currWordList.add(word);
+        boolean endOfJourney = true;
+
+        if (!word.isEmpty()){
+            String letter = String.valueOf(word.charAt(0));
+            List<Transition> availableTransitions = transitions.stream().filter(t -> t.getStateSource().getName().equals(state.getName()) && t.getSymbols().contains(letter)).toList();
+            for (Transition t : availableTransitions){
+                endOfJourney = false;
+                Pair<List<State>, List<String>> tmpResult = getWholePathRec(word.substring(1), t.getStateDestination(), new LinkedHashSet<>(), currStateList, currWordList);
+                result.getKey().addAll(tmpResult.getKey());
+                result.getValue().addAll(tmpResult.getValue());
+            }
+        }
+
+        epsilonTransitions.add(state.getName());
+        List<Transition> availableEpsilonTransitions = transitions.stream().filter(t -> t.getStateSource().getName().equals(state.getName()) && t.getSymbols().contains("ε")).toList();
+        for (Transition t : availableEpsilonTransitions){
+            if (epsilonTransitions.contains(t.getStateDestination().getName())){
+                continue;
+            }
+            endOfJourney = false;
+            Pair<List<State>, List<String>> tmpResult = getWholePathRec(word, t.getStateDestination(), epsilonTransitions, currStateList, currWordList);
+            result.getKey().addAll(tmpResult.getKey());
+            result.getValue().addAll(tmpResult.getValue());
+        }
+        if (endOfJourney){
+            result = new Pair<>(new ArrayList<>(currStateList), new ArrayList<>(currWordList));
+        }
+        currStateList.remove(state);
+        currWordList.remove(word);
+        return result;
+    }
+
+    public Pair<List<State>, List<String>> getWordPath(String word){
+        State initial = states.stream().filter(State::isStateBegin).toList().get(0);
+        if (isWordLegal(word)){
+            return new Pair<>(getWordPathRec(word, initial, new LinkedHashSet<>()), new ArrayList<>());
+        }
+        return getWholePathRec(word, initial, new LinkedHashSet<>(), new ArrayList<>(), new ArrayList<>());
     }
 }

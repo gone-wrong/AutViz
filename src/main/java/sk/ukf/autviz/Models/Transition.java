@@ -15,7 +15,8 @@ public class Transition {
 
     private final ReadOnlyStringWrapper characterWrapper = new ReadOnlyStringWrapper();
 
-    private final SimpleBooleanProperty hasOpposite = new SimpleBooleanProperty(false);
+    private final BooleanProperty hasOpposite = new SimpleBooleanProperty(false);
+    private final BooleanProperty isActive = new SimpleBooleanProperty(false);
 
     public Transition(State stateSource, String symbol, State stateDestination) {
         this.stateSource = stateSource;
@@ -27,6 +28,18 @@ public class Transition {
             symbols.add(processedSymbol);
             updateCharacterWrapper();
         }
+    }
+
+    public boolean isActive() {
+        return isActive.get();
+    }
+
+    public void setActive(boolean active) {
+        isActive.set(active);
+    }
+
+    public BooleanProperty isActiveProperty() {
+        return isActive;
     }
 
     private String processSymbol(String sym) {

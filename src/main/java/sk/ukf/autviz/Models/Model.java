@@ -4,10 +4,15 @@ import sk.ukf.autviz.Views.ViewFactory;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public class Model {
     private static Model model;
     private final ViewFactory viewFactory;
     private Automata currentAutomata;
+    private Map<State, StateCellData> stateMapping = new HashMap<>();
+
     private final BooleanProperty editMode = new SimpleBooleanProperty(false);
     private final BooleanProperty deleteStateMode = new SimpleBooleanProperty(false);
     private final BooleanProperty deleteEdgeMode = new SimpleBooleanProperty(false);
@@ -30,6 +35,9 @@ public class Model {
     }
 
     public Automata getCurrentAutomata() {
+        if (currentAutomata == null) {
+            currentAutomata = createSampleAutomaton();
+        }
         return currentAutomata;
     }
 
@@ -150,5 +158,53 @@ public class Model {
 
     public void setUpdateView3(boolean value) {
         updateView3.set(value);
+    }
+
+    private Automata createSampleAutomaton() {
+        Automata a = new Automata();
+
+        // vytvorenie 5 stavov
+        State q0 = new State("q0");
+        State q1 = new State("q1");
+        State q2 = new State("qqqqq2"); // Begin a End
+        State q3 = new State("q3");
+        State q4 = new State("q4"); // End
+
+        // nastavenie príznakov:
+        q2.setStateBegin(true);
+        q2.setStateEnd(true);
+        q4.setStateEnd(true);
+
+        a.addState(q0);
+        a.addState(q1);
+        a.addState(q4);
+        a.addState(q3);
+        a.addState(q2);
+
+        a.addTransition(new Transition(q1, "b", q0));
+        a.addTransition(new Transition(q2, "a", q0));
+        a.addTransition(new Transition(q0, "b", q1));
+        a.addTransition(new Transition(q0, "b", q3));
+        a.addTransition(new Transition(q0, "a", q3));
+        a.addTransition(new Transition(q1, "a", q3));
+        a.addTransition(new Transition(q1, "b", q1));
+        a.addTransition(new Transition(q3, "b", q4));
+        a.addTransition(new Transition(q4, "a", q2));
+
+        return a;
+    }
+
+    public Map<State, StateCellData> getStateMapping() {
+        return stateMapping;
+    }
+
+    // Optionally, you can have a setter if needed.
+    public void setStateMapping(Map<State, StateCellData> mapping) {
+        this.stateMapping = mapping;
+    }
+
+    // Convenience method to clear the mapping.
+    public void clearStateMapping() {
+        stateMapping.clear();
     }
 }

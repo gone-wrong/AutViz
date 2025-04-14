@@ -208,27 +208,21 @@ public class View3Controller implements Initializable {
 
     private void addButtonListeners() {
         add_edge_button.setOnAction(event -> {
-            // Disable other modes while adding an edge.
             Model.getInstance().disableModes();
 
-            // Create the dialog for adding a new edge.
             Dialog<EdgeData> dialog = new Dialog<>();
             dialog.setTitle("Add New Transition");
             dialog.setHeaderText("Vyber a zadaj detaily pre nový prechod:");
 
-            // Set up the dialog buttons.
             ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
             dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
 
-            // Create a GridPane and add controls.
             GridPane grid = new GridPane();
             grid.setHgap(10);
             grid.setVgap(10);
 
-            // ComboBox for the source state.
             ComboBox<State> sourceCombo = new ComboBox<>();
             sourceCombo.getItems().addAll(Model.getInstance().getCurrentAutomata().getStates());
-            // Configure the cell factory so the state is shown by its name.
             sourceCombo.setCellFactory(param -> new ListCell<>() {
                 @Override
                 protected void updateItem(State item, boolean empty) {
@@ -245,11 +239,9 @@ public class View3Controller implements Initializable {
             });
             sourceCombo.setPromptText("Vyber 1. stav");
 
-            // TextField for transition symbol(s).
             TextField symbolField = new TextField();
             symbolField.setPromptText("a,b, ...");
 
-            // ComboBox for the target state.
             ComboBox<State> targetCombo = new ComboBox<>();
             targetCombo.getItems().addAll(Model.getInstance().getCurrentAutomata().getStates());
             targetCombo.setCellFactory(param -> new ListCell<>() {
@@ -268,7 +260,6 @@ public class View3Controller implements Initializable {
             });
             targetCombo.setPromptText("Vyber 2. stav");
 
-            // Add the controls to the grid.
             grid.add(new Label("Stav 1:"), 0, 0);
             grid.add(sourceCombo, 1, 0);
             grid.add(new Label("Symboly:"), 0, 1);
@@ -278,11 +269,9 @@ public class View3Controller implements Initializable {
 
             dialog.getDialogPane().setContent(grid);
 
-            // Enable/Disable OK button based on whether all required fields are filled.
             Node okButton = dialog.getDialogPane().lookupButton(okButtonType);
             okButton.setDisable(true);
 
-            // Listen for changes in the text field and combo boxes.
             symbolField.textProperty().addListener((observable, oldValue, newValue) -> {
                 okButton.setDisable(newValue.trim().isEmpty()
                         || sourceCombo.getValue() == null
@@ -299,7 +288,6 @@ public class View3Controller implements Initializable {
                         || newVal == null);
             });
 
-            // Convert the dialog result to a NewEdgeData object when OK is clicked.
             dialog.setResultConverter(dialogButton -> {
                 if (dialogButton == okButtonType) {
                     return new EdgeData(sourceCombo.getValue(), symbolField.getText(), targetCombo.getValue());
@@ -310,13 +298,10 @@ public class View3Controller implements Initializable {
             Optional<EdgeData> result = dialog.showAndWait();
             result.ifPresent(data -> {
                 if (data.getSource() != null && data.getTarget() != null && !data.getSymbols().trim().isEmpty()) {
-                    // Create and add the new transition.
                     Transition newTransition = new Transition(data.getSource(), data.getSymbols(), data.getTarget());
                     Model.getInstance().getCurrentAutomata().addTransition(newTransition);
-                    // Refresh the tree view by rebuilding the state tree and redrawing it.
                     StateTreeNode newRoot = buildStateTree(Model.getInstance().getCurrentAutomata());
                     drawStateTree(newRoot);
-                    // Optionally update any related view update flags.
                     Model.getInstance().setUpdateView1(true);
                     Model.getInstance().setUpdateView3(true);
                 }

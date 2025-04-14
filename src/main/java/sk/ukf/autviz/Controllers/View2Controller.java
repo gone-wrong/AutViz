@@ -45,7 +45,6 @@ public class View2Controller implements Initializable {
         Automata automata = Model.getInstance().getCurrentAutomata();
         buildTransitionTable(automata);
         addButtonListeners();
-        // Vyvolane zmenou na View2 a View2 sa ma updatnut
         Model.getInstance().getViewFactory().getClientSelectedViewProperty().addListener(
                 (observable, oldValue, newValue) -> {
                     if (Model.getInstance().getViewFactory().getClientSelectedViewProperty().get().equals("View2")
@@ -54,7 +53,6 @@ public class View2Controller implements Initializable {
                         Model.getInstance().setUpdateView2(false);
                     }
                 });
-        // Vyvolane zmenou updateView2 property na true a sme vo View2
         Model.getInstance().updateView2Property().addListener((obs, oldVal, newVal) -> {
             if (newVal && Model.getInstance().getViewFactory().getClientSelectedViewProperty().get().equals("View2")) {
                 buildTransitionTable(automata);
@@ -65,114 +63,6 @@ public class View2Controller implements Initializable {
         });
         transition_table.setEditable(true);
     }
-/*
-    private void buildTransitionTable(Automata automata) {
-        System.out.println("Building transition table");
-        ObservableList<TransitionRow> rows = FXCollections.observableArrayList();
-        for (Transition t : automata.getTransitions()) {
-            rows.add(new TransitionRow(t.getStateSource(), t, t.getStateDestination()));
-        }
-        transition_table.setItems(rows);
-
-        TableColumn<TransitionRow, String> sourceCol = new TableColumn<>("Source");
-        sourceCol.setCellValueFactory(cellData -> cellData.getValue().sourceProperty());
-        sourceCol.setPrefWidth(COLUMN_PREF_WIDTH);
-        sourceCol.setCellFactory(col -> new TableCell<TransitionRow, String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                textProperty().unbind();
-                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
-                    setText(null);
-                    setGraphic(null);
-                    setStyle("");
-                } else {
-                    TransitionRow row = getTableRow().getItem();
-                    textProperty().bind(Bindings.createStringBinding(
-                            () -> decorateStateName(
-                                    row.getSource().nameProperty().get(),
-                                    row.getSource().stateBeginProperty().get(),
-                                    row.getSource().stateEndProperty().get()
-                            ),
-                            row.getSource().nameProperty(),
-                            row.getSource().stateBeginProperty(),
-                            row.getSource().stateEndProperty()
-                    ));
-                    setStyle("-fx-font-weight: bold;");
-                }
-            }
-        });
-
-        TableColumn<TransitionRow, String> symbolCol = new TableColumn<>("Symbol(s)");
-        symbolCol.setCellValueFactory(cellData -> cellData.getValue().symbolProperty());
-        symbolCol.setPrefWidth(COLUMN_PREF_WIDTH);
-
-        TableColumn<TransitionRow, String> destinationCol = new TableColumn<>("Destination");
-        destinationCol.setCellValueFactory(cellData -> cellData.getValue().destinationProperty());
-        destinationCol.setPrefWidth(COLUMN_PREF_WIDTH);
-        destinationCol.setCellFactory(col -> new TableCell<TransitionRow, String>() {
-            @Override
-            protected void updateItem(String item, boolean empty) {
-                super.updateItem(item, empty);
-                textProperty().unbind();
-                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
-                    setText(null);
-                    setGraphic(null);
-                    setStyle("");
-                } else {
-                    TransitionRow row = getTableRow().getItem();
-                    textProperty().bind(Bindings.createStringBinding(
-                            () -> decorateStateName(
-                                    row.getDestination().nameProperty().get(),
-                                    row.getDestination().stateBeginProperty().get(),
-                                    row.getDestination().stateEndProperty().get()
-                            ),
-                            row.getDestination().nameProperty(),
-                            row.getDestination().stateBeginProperty(),
-                            row.getDestination().stateEndProperty()
-                    ));
-                    setStyle("-fx-font-weight: bold;");
-                }
-            }
-        });
-
-        TableColumn<TransitionRow, Void> deleteColumn = new TableColumn<>("");
-        deleteColumn.setPrefWidth(50);
-        deleteColumn.setCellFactory(col -> new TableCell<TransitionRow, Void>() {
-            private final Button deleteButton = new Button("-");
-
-            {
-                // Style the delete button if desired.
-                deleteButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
-                // Set up the action for when the button is clicked.
-                deleteButton.setOnAction(event -> {
-                    TransitionRow currentRow = getTableView().getItems().get(getIndex());
-                    // Remove from the automata model.
-                    Model.getInstance().getCurrentAutomata().removeTransition(currentRow.getTransition());
-                    // Remove the row from the TableView.
-                    getTableView().getItems().remove(currentRow);
-                    // Optionally, if other views depend on the model, trigger an update.
-                    // For example:
-                    Model.getInstance().setUpdateView1(true);
-                    Model.getInstance().setUpdateView3(true);
-                });
-            }
-
-            @Override
-            protected void updateItem(Void item, boolean empty) {
-                super.updateItem(item, empty);
-                if (empty) {
-                    setGraphic(null);
-                } else {
-                    setGraphic(deleteButton);
-                }
-            }
-        });
-
-        // Set all your columns into the TableView
-        transition_table.getColumns().setAll(sourceCol, symbolCol, destinationCol, deleteColumn);
-    }
-*/
 
 private void buildTransitionTable(Automata automata) {
     System.out.println("Building transition table");
@@ -182,29 +72,23 @@ private void buildTransitionTable(Automata automata) {
     }
     transition_table.setItems(rows);
 
-    // Allow table editing.
     transition_table.setEditable(true);
 
-    // --- Source Column with Inline Editing and Decoration ---
     TableColumn<TransitionRow, String> sourceCol = new TableColumn<>("Source");
     sourceCol.setCellValueFactory(cellData -> cellData.getValue().sourceProperty());
     sourceCol.setPrefWidth(COLUMN_PREF_WIDTH);
 
-    // Use a custom cell factory that creates a TextFieldTableCell.
     sourceCol.setCellFactory(col -> new TextFieldTableCell<TransitionRow, String>(new DefaultStringConverter()) {
         @Override
         public void updateItem(String item, boolean empty) {
             super.updateItem(item, empty);
-            // If not editing, display decorated text.
             if (!isEditing()) {
                 if (empty || getTableRow() == null || getTableRow().getItem() == null) {
                     setText(null);
                     setGraphic(null);
                 } else {
                     TransitionRow row = getTableRow().getItem();
-                    // Get the raw state name from the source object.
                     String rawName = row.getSource().nameProperty().get();
-                    // Decorate it (e.g., add "► " if it is a beginning state, " !" if it is an end state).
                     setText(decorateStateName(rawName,
                             row.getSource().stateBeginProperty().get(),
                             row.getSource().stateEndProperty().get()));
@@ -213,20 +97,16 @@ private void buildTransitionTable(Automata automata) {
         }
         @Override
         public void commitEdit(String newValue) {
-            // Remove any decorations before updating the underlying value.
             newValue = newValue.replace("► ", "").replace(" !", "").trim();
             super.commitEdit(newValue);
-            // Update the underlying model
             TransitionRow row = getTableRow().getItem();
             row.getSource().nameProperty().set(newValue);
-            // Refresh the table to ensure decorations are re-computed.
             getTableView().refresh();
         }
 
         @Override
         public void cancelEdit() {
             super.cancelEdit();
-            // When canceling, reset the cell text with the decorated text.
             if (getTableRow() != null && getTableRow().getItem() != null) {
                 TransitionRow row = getTableRow().getItem();
                 String rawName = row.getSource().nameProperty().get();
@@ -237,18 +117,14 @@ private void buildTransitionTable(Automata automata) {
         }
     });
 
-    // Update the model when an edit is committed.
     sourceCol.setOnEditCommit(event -> {
         TransitionRow row = event.getRowValue();
         String newValue = event.getNewValue();
-        // Remove decoration if any before updating (if needed).
         newValue = newValue.replace("► ", "").replace(" !", "").trim();
         row.getSource().nameProperty().set(newValue);
-        // Refresh the table so the decoration is re‑computed.
         transition_table.refresh();
     });
 
-    // --- Symbol Column (Editable) ---
     TableColumn<TransitionRow, String> symbolCol = new TableColumn<>("Symboly");
     symbolCol.setCellValueFactory(cellData -> cellData.getValue().symbolProperty());
     symbolCol.setPrefWidth(COLUMN_PREF_WIDTH);
@@ -261,7 +137,6 @@ private void buildTransitionTable(Automata automata) {
         transition_table.refresh();
     });
 
-    // --- Destination Column with Inline Editing and Decoration ---
     TableColumn<TransitionRow, String> destinationCol = new TableColumn<>("Destination");
     destinationCol.setCellValueFactory(cellData -> cellData.getValue().destinationProperty());
     destinationCol.setPrefWidth(COLUMN_PREF_WIDTH);
@@ -284,20 +159,16 @@ private void buildTransitionTable(Automata automata) {
         }
         @Override
         public void commitEdit(String newValue) {
-            // Remove any decorations before updating the underlying value.
             newValue = newValue.replace("► ", "").replace(" !", "").trim();
             super.commitEdit(newValue);
-            // Update the underlying model
             TransitionRow row = getTableRow().getItem();
             row.getSource().nameProperty().set(newValue);
-            // Refresh the table to ensure decorations are re-computed.
             getTableView().refresh();
         }
 
         @Override
         public void cancelEdit() {
             super.cancelEdit();
-            // When canceling, reset the cell text with the decorated text.
             if (getTableRow() != null && getTableRow().getItem() != null) {
                 TransitionRow row = getTableRow().getItem();
                 String rawName = row.getSource().nameProperty().get();
@@ -315,7 +186,6 @@ private void buildTransitionTable(Automata automata) {
         transition_table.refresh();
     });
 
-    // --- Delete Column (Button) ---
     TableColumn<TransitionRow, Void> deleteColumn = new TableColumn<>("");
     deleteColumn.setPrefWidth(50);
     deleteColumn.setCellFactory(col -> new TableCell<TransitionRow, Void>() {
@@ -324,9 +194,7 @@ private void buildTransitionTable(Automata automata) {
             deleteButton.setStyle("-fx-background-color: red; -fx-text-fill: white;");
             deleteButton.setOnAction(event -> {
                 TransitionRow currentRow = getTableView().getItems().get(getIndex());
-                // Remove the transition from the model.
                 Model.getInstance().getCurrentAutomata().removeTransition(currentRow.getTransition());
-                // Remove row from the table.
                 getTableView().getItems().remove(currentRow);
                 Model.getInstance().setUpdateView1(true);
                 Model.getInstance().setUpdateView3(true);
@@ -343,7 +211,6 @@ private void buildTransitionTable(Automata automata) {
         }
     });
 
-    // Add all columns to the table.
     transition_table.getColumns().setAll(sourceCol, symbolCol, destinationCol, deleteColumn);
 }
 
@@ -515,19 +382,15 @@ private void buildTransitionTable(Automata automata) {
             dialog.setTitle("Add New Transition");
             dialog.setHeaderText("Vyber a zadaj detaily pre nový prechod:");
 
-            // Set up the dialog buttons.
             ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
             dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
 
-            // Create a GridPane and add controls.
             GridPane grid = new GridPane();
             grid.setHgap(10);
             grid.setVgap(10);
 
-            // ComboBox for source state
             ComboBox<State> sourceCombo = new ComboBox<>();
             sourceCombo.getItems().addAll(Model.getInstance().getCurrentAutomata().getStates());
-            // Set a cell factory and converter so that the state is displayed by its name.
             sourceCombo.setCellFactory(param -> new ListCell<>() {
                 @Override
                 protected void updateItem(State item, boolean empty) {
@@ -544,11 +407,9 @@ private void buildTransitionTable(Automata automata) {
             });
             sourceCombo.setPromptText("Vyber 1. stav");
 
-            // TextField for symbols
             TextField symbolField = new TextField();
             symbolField.setPromptText("a,b, ...");
 
-            // ComboBox for target state
             ComboBox<State> targetCombo = new ComboBox<>();
             targetCombo.getItems().addAll(Model.getInstance().getCurrentAutomata().getStates());
             targetCombo.setCellFactory(param -> new ListCell<>() {
@@ -576,10 +437,8 @@ private void buildTransitionTable(Automata automata) {
 
             dialog.getDialogPane().setContent(grid);
 
-            // Enable/Disable OK button based on whether required fields are filled.
             Node okButton = dialog.getDialogPane().lookupButton(okButtonType);
             okButton.setDisable(true);
-            // Listen to changes in the text field and combo boxes.
             symbolField.textProperty().addListener((observable, oldValue, newValue) -> {
                 okButton.setDisable(newValue.trim().isEmpty() ||
                         sourceCombo.getValue() == null ||
@@ -594,7 +453,6 @@ private void buildTransitionTable(Automata automata) {
                         sourceCombo.getValue() == null || newVal == null);
             });
 
-            // Convert the result to a NewEdgeData object when OK is clicked.
             dialog.setResultConverter(dialogButton -> {
                 if (dialogButton == okButtonType) {
                     return new NewEdgeData(sourceCombo.getValue(), symbolField.getText(), targetCombo.getValue());
@@ -604,11 +462,9 @@ private void buildTransitionTable(Automata automata) {
 
             Optional<NewEdgeData> result = dialog.showAndWait();
             result.ifPresent(data -> {
-                // Create and add a new transition to the automata model.
                 if (data.getSource() != null && data.getTarget() != null && !data.getSymbols().trim().isEmpty()) {
                     Transition newTransition = new Transition(data.getSource(), data.getSymbols(), data.getTarget());
                     Model.getInstance().getCurrentAutomata().addTransition(newTransition);
-                    // (Optionally) Rebuild the table to show the new transition
                     buildTransitionTable(Model.getInstance().getCurrentAutomata());
 
                     Model.getInstance().setUpdateView1(true);
@@ -619,20 +475,16 @@ private void buildTransitionTable(Automata automata) {
     }
 
     private void showDeleteStatesDialog() {
-        // Create a dialog to list all states with checkboxes.
         Dialog<List<State>> dialog = new Dialog<>();
         dialog.setTitle("Delete States");
         dialog.setHeaderText("Vyber stavy na vymazanie:");
 
-        // Add OK and CANCEL buttons.
         ButtonType deleteButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
         dialog.getDialogPane().getButtonTypes().addAll(deleteButtonType, ButtonType.CANCEL);
 
-        // Create a VBox and a Map to hold CheckBoxes associated with each state.
         VBox vbox = new VBox(10);
         Map<CheckBox, State> checkBoxStateMap = new HashMap<>();
 
-        // Get the list of states from the Automata.
         Automata automata = Model.getInstance().getCurrentAutomata();
         for (State state : automata.getStates()) {
             CheckBox cb = new CheckBox(state.getName());
@@ -642,7 +494,6 @@ private void buildTransitionTable(Automata automata) {
 
         dialog.getDialogPane().setContent(vbox);
 
-        // Convert the result when OK is clicked.
         dialog.setResultConverter(dialogButton -> {
             if (dialogButton == deleteButtonType) {
                 return checkBoxStateMap.entrySet().stream()
@@ -656,20 +507,16 @@ private void buildTransitionTable(Automata automata) {
         Optional<List<State>> result = dialog.showAndWait();
         result.ifPresent(selectedStates -> {
             if (!selectedStates.isEmpty()) {
-                // Remove transitions that involve any of the selected states.
                 automata.getTransitions().removeIf(t ->
                         selectedStates.contains(t.getStateSource()) ||
                                 selectedStates.contains(t.getStateDestination()));
 
-                // Remove the selected states.
                 automata.getStates().removeAll(selectedStates);
 
-                // Optionally, log the result.
                 System.out.println("Deleted states: " + selectedStates.stream()
                         .map(State::getName)
                         .collect(Collectors.joining(", ")));
 
-                // Update the TableView by rebuilding the transition table.
                 buildTransitionTable(automata);
                 Model.getInstance().setUpdateView1(true);
                 Model.getInstance().setUpdateView3(true);

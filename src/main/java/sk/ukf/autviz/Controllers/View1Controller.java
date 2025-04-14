@@ -38,7 +38,6 @@ public class View1Controller implements Initializable {
 
     private Graph graph;
     private com.fxgraph.graph.Model graphModel; // model z FXGraph
-    private Map<State, StateCellData> stateMapping = new HashMap<>();
 
     private String newStateName = "";
 
@@ -48,10 +47,7 @@ public class View1Controller implements Initializable {
     public void initialize(URL url, ResourceBundle resourceBundle) {
         System.out.println("Initializing View1Controller");
         Automata automata = Model.getInstance().getCurrentAutomata();
-        if (automata == null) {
-            automata = createSampleAutomaton();
-            Model.getInstance().setCurrentAutomata(automata);
-        }
+
         this.graph = new Graph();
         this.graphModel = graph.getModel();
 
@@ -88,14 +84,14 @@ public class View1Controller implements Initializable {
             graphModel.addCell(cell);
             Region graphicNode = cell.getGraphic(graph);
             StateCellData cellData = new StateCellData(cell, graphicNode);
-            stateMapping.put(state, cellData);
+            Model.getInstance().getStateMapping().put(state, cellData);
 
             attachClickHandlers(graphicNode, state);
         }
 
         for (Transition t : automata.getTransitions()) {
-            StateCellData sourceData = stateMapping.get(t.getStateSource());
-            StateCellData targetData = stateMapping.get(t.getStateDestination());
+            StateCellData sourceData = Model.getInstance().getStateMapping().get(t.getStateSource());
+            StateCellData targetData = Model.getInstance().getStateMapping().get(t.getStateDestination());
             if (sourceData != null && targetData != null) {
                 ICell source = sourceData.getCell();
                 ICell target = targetData.getCell();
@@ -135,7 +131,7 @@ public class View1Controller implements Initializable {
         graph.beginUpdate();
 
         for (State s : automata.getStates()) {
-            StateCellData cellData = stateMapping.get(s);
+            StateCellData cellData = Model.getInstance().getStateMapping().get(s);
             // State je v Modeli ale nie je v stateMapping = bol pridany v inom view
             // vytvorime mu stateMapping a vsetko potrebne na vizualizaciu
             if (cellData == null) {
@@ -144,7 +140,7 @@ public class View1Controller implements Initializable {
                 Region graphicNode = cell.getGraphic(graph);
                 attachClickHandlers(graphicNode, s);
                 cellData = new StateCellData(cell, graphicNode);
-                stateMapping.put(s, cellData);
+                Model.getInstance().getStateMapping().put(s, cellData);
             } else {
                 Region graphicNode = cellData.getGraphicNode();
                 graphicNode.setLayoutX(cellData.getLayoutX());
@@ -154,8 +150,8 @@ public class View1Controller implements Initializable {
         }
 
         for (Transition t : automata.getTransitions()) {
-            StateCellData sourceData = stateMapping.get(t.getStateSource());
-            StateCellData targetData = stateMapping.get(t.getStateDestination());
+            StateCellData sourceData = Model.getInstance().getStateMapping().get(t.getStateSource());
+            StateCellData targetData = Model.getInstance().getStateMapping().get(t.getStateDestination());
             if (sourceData != null && targetData != null) {
                 ICell source = sourceData.getCell();
                 ICell target = targetData.getCell();
@@ -173,68 +169,8 @@ public class View1Controller implements Initializable {
         graph.endUpdate();
     }
 
-    private Automata createSampleAutomaton() {
-        Automata a = new Automata();
-
-        // vytvorenie 5 stavov
-        State q0 = new State("q0");
-        State q1 = new State("q1");
-        State q2 = new State("qqqqq2"); // Begin a End
-        State q3 = new State("q3");
-        State q4 = new State("q4"); // End
-
-        // nastavenie príznakov:
-        q2.setStateBegin(true);
-        q2.setStateEnd(true);
-        q4.setStateEnd(true);
-
-        a.addState(q0);
-        a.addState(q1);
-        a.addState(q4);
-        a.addState(q3);
-        a.addState(q2);
-
-//        State q5 = new State("q5");
-//        State q6 = new State("q6");
-//        State q7 = new State("q7");
-//        State q8 = new State("q8");
-//        State q9 = new State("q9");
-//        State q10 = new State("q10");
-//        State q11 = new State("q11");
-//        State q12 = new State("q12");
-//        State q13 = new State("q13");
-//        State q14 = new State("q14");
-//        a.addState(q5);
-//        a.addState(q6);
-//        a.addState(q7);
-//        a.addState(q8);
-//        a.addState(q9);
-//        a.addState(q10);
-//        a.addState(q11);
-//        a.addState(q12);
-//        a.addState(q13);
-//        a.addState(q14);
-
-        // testovanie curved DirectedEdge
-        a.addTransition(new Transition(q1, "b", q0));
-        a.addTransition(new Transition(q2, "aaaaaa", q0));
-        a.addTransition(new Transition(q0, "b", q1));
-        a.addTransition(new Transition(q0, "b", q3));
-        a.addTransition(new Transition(q0, "a", q3));
-        a.addTransition(new Transition(q1, "a", q3));
-        a.addTransition(new Transition(q1, "b", q1));
-        a.addTransition(new Transition(q3, "b", q4));
-        a.addTransition(new Transition(q4, "a", q2));
-
-//        State q1 = new State("q1");
-//        a.addState(q1);
-//        a.addTransition(new Transition(q1, "a", q1));
-
-        return a;
-    }
-
     public void updateAllStatePositions() {
-        for (Map.Entry<State, StateCellData> entry : stateMapping.entrySet()) {
+        for (Map.Entry<State, StateCellData> entry : Model.getInstance().getStateMapping().entrySet()) {
             StateCellData cellData = entry.getValue();
             Region graphicNode = cellData.getCell().getGraphic(graph);
             // current layout positions.
@@ -258,7 +194,7 @@ public class View1Controller implements Initializable {
         });
 
         add_edge_button.setOnAction(event -> {
-            StateCellData sourceData = stateMapping.get(selectedEdgeSource);
+            StateCellData sourceData = Model.getInstance().getStateMapping().get(selectedEdgeSource);
             if (sourceData != null) {
                 Region node = sourceData.getGraphicNode();
                 node.setStyle("");
@@ -332,7 +268,7 @@ public class View1Controller implements Initializable {
             Region graphicNode = newStateCell.getGraphic(graph);
             attachClickHandlers(graphicNode, newState);
             StateCellData cellData = new StateCellData(newStateCell, graphicNode);
-            stateMapping.put(newState, cellData);
+            Model.getInstance().getStateMapping().put(newState, cellData);
             Model.getInstance().setUpdateView2(true);
             Model.getInstance().setUpdateView3(true);
             updateVisualization();
@@ -343,7 +279,7 @@ public class View1Controller implements Initializable {
         if (selectedEdgeSource == null) {
             selectedEdgeSource = clickedState;
             System.out.println("Edge source selected: " + selectedEdgeSource.getName());
-            StateCellData cellData = stateMapping.get(selectedEdgeSource);
+            StateCellData cellData = Model.getInstance().getStateMapping().get(selectedEdgeSource);
             if (cellData != null) {
                 Region node = cellData.getGraphicNode();
                 node.setStyle("-fx-border-color: red;-fx-background-radius: 51%;-fx-border-radius: 50%;");
@@ -366,7 +302,7 @@ public class View1Controller implements Initializable {
                 Model.getInstance().setUpdateView3(true);
                 updateVisualization();
             });
-            StateCellData sourceData = stateMapping.get(selectedEdgeSource);
+            StateCellData sourceData = Model.getInstance().getStateMapping().get(selectedEdgeSource);
             if (sourceData != null) {
                 Region node = sourceData.getGraphicNode();
                 node.setStyle("");
@@ -391,7 +327,7 @@ public class View1Controller implements Initializable {
                         t.getStateSource().equals(state) || t.getStateDestination().equals(state)
                 );
                 automata.removeState(state);
-                stateMapping.remove(state);
+                Model.getInstance().getStateMapping().remove(state);
                 Model.getInstance().setUpdateView2(true);
                 Model.getInstance().setUpdateView3(true);
                 updateVisualization();

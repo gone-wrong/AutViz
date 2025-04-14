@@ -51,4 +51,19 @@ public class StateTreeNode {
     public String toString() {
         return state.getName();
     }
+
+    public void printTree() {
+        printTreeRecursive(this, "");
+    }
+
+    private void printTreeRecursive(StateTreeNode node, String indent) {
+        String transitionLabel = (node.getTransition() != null && !node.getTransitionLabel().isEmpty())
+                ? " - " + node.getTransitionLabel()
+                : "";
+        System.out.println(indent + node.getState().getName() + transitionLabel);
+
+        for (StateTreeNode child : node.getChildren()) {
+            printTreeRecursive(child, indent + "    ");
+        }
+    }
 }

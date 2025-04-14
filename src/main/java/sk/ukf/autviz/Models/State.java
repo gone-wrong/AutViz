@@ -11,9 +11,22 @@ public class State implements Comparable<State> {
     private final StringProperty stateName = new SimpleStringProperty();
     private final BooleanProperty stateEnd = new SimpleBooleanProperty(false);
     private final BooleanProperty stateBegin = new SimpleBooleanProperty(false);
+    private final BooleanProperty isActive = new SimpleBooleanProperty(false);
 
     public State(String name) {
         this.stateName.set(name);
+    }
+
+    public boolean isActive() {
+        return isActive.get();
+    }
+
+    public void setActive(boolean active) {
+        isActive.set(active);
+    }
+
+    public BooleanProperty isActiveProperty() {
+        return isActive;
     }
 
     public String getName() {

@@ -6,6 +6,7 @@ module sk.ukf.autviz {
     requires org.abego.treelayout.core;
     requires fxgraph;
     requires org.json;
+    requires java.sql;
 
     opens sk.ukf.autviz to javafx.fxml;
     exports sk.ukf.autviz;
