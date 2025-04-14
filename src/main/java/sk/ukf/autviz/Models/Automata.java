@@ -29,7 +29,9 @@ public class Automata {
             if (existing.getStateSource().getName().equals(newTransition.getStateSource().getName()) &&
                     existing.getStateDestination().getName().equals(newTransition.getStateDestination().getName())) {
 
-                existing.addSymbol(newTransition.getCharacter());
+                for (String symbol : newTransition.getSymbols()) {
+                    existing.addSymbol(symbol);
+                }
 
                 if (transitions.stream().anyMatch(t ->
                         t != existing &&
@@ -95,46 +97,6 @@ public class Automata {
             }
         }
     }
-    
-    /*
-    public static Automata fromFile(String path) throws IOException {
-        File file = new File(path);
-        BufferedReader fileBuffer = new BufferedReader(new FileReader(file));
-        Automata automata = new Automata();
-        while (fileBuffer.ready()) {
-            String lineFile = fileBuffer.readLine().trim();
-            if(!lineFile.isEmpty()) {
-                if(lineFile.startsWith("A")) {
-                    for (String simbolo : lineFile.substring(2).split(";")) {
-                        automata.addAlphabet(simbolo.trim());
-                    }
-                } else if(lineFile.startsWith("E")) {
-                    for (String states : lineFile.substring(2).split(";")) {
-                        String[] stateArray = states.trim().split("-");
-                        State state = new State(stateArray[0]);
-                        for(int i = 1; i < stateArray.length; i++) {
-                            if(stateArray[i].equals("I")) {
-                                state.setStateBegin(Boolean.TRUE);
-                            } else {
-                                if(stateArray[i].equals("F")) {
-                                    state.setStateEnd(Boolean.TRUE);
-                                }
-                            }
-                        }
-                        automata.addState(state);
-                    }
-                } else if(lineFile.startsWith("T")) {
-                    for (String transition : lineFile.substring(2).split(";")) {
-                        String transitionsLine[] = transition.split("-");
-                        automata.addTransition(new Transition(new State(transitionsLine[0].trim()), transitionsLine[1].trim(), new State(transitionsLine[2].trim())));
-                    }
-                }
-            }
-        }
-        fileBuffer.close();
-        return automata;
-    }
-    */
     
     @Override
     public String toString() {

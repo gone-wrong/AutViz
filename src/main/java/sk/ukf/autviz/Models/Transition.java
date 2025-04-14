@@ -20,9 +20,13 @@ public class Transition {
     public Transition(State stateSource, String symbol, State stateDestination) {
         this.stateSource = stateSource;
         this.stateDestination = stateDestination;
-        String processedSymbol = processSymbol(symbol);
-        symbols.add(processedSymbol);
-        updateCharacterWrapper();
+        if (symbol.contains(",")) {
+            setSymbols(symbol);
+        } else {
+            String processedSymbol = processSymbol(symbol);
+            symbols.add(processedSymbol);
+            updateCharacterWrapper();
+        }
     }
 
     private String processSymbol(String sym) {

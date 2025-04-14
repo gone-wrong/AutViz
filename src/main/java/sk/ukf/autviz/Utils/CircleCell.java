@@ -58,24 +58,19 @@ public class CircleCell extends AbstractCell {
         beginIndicator.setStroke(Color.BLACK);
         beginIndicator.setStrokeWidth(2);
         beginIndicator.setTranslateX(-30);
-        // Bind its visibility to state.begin (only if we want to show the indicator).
         if (showBeginIndicator) {
             beginIndicator.visibleProperty().bind(state.stateBeginProperty());
             basePane.getChildren().add(beginIndicator);
         }
 
-        // Add the main circle and label.
         basePane.getChildren().add(circlePane);
 
-        // Create the end indicator as an outer circle.
         endIndicator = new Circle(34);
         endIndicator.setFill(Color.TRANSPARENT);
         endIndicator.setStroke(Color.DARKBLUE);
         endIndicator.setStrokeWidth(1);
-        // Bind its visibility to the state's end property.
         endIndicator.visibleProperty().bind(state.stateEndProperty());
 
-        // Place both the outer circle and the basePane into an outer pane.
         StackPane outerPane = new StackPane();
         outerPane.setPrefSize(68, 68);
         outerPane.getChildren().addAll(endIndicator, basePane);
@@ -84,42 +79,34 @@ public class CircleCell extends AbstractCell {
 
         view.setOnMouseClicked(event -> {
             if (Model.getInstance().isEditMode()) {
-                // Create a custom dialog with a grid pane layout.
                 Dialog<ButtonType> dialog = new Dialog<>();
                 dialog.setTitle("Edit State");
-                dialog.setHeaderText("Edit state properties");
+                dialog.setHeaderText("Editovanie stavu");
 
-                // Create a GridPane for the input controls.
                 GridPane grid = new GridPane();
                 grid.setHgap(10);
                 grid.setVgap(10);
                 grid.setPadding(new Insets(20, 150, 10, 10));
 
-                // Create a TextField prepopulated with the current state name.
                 TextField nameField = new TextField();
                 nameField.setText(state.getName());
 
-                // Create CheckBoxes for "begin" and "end" flags.
-                CheckBox beginCheck = new CheckBox("Beginning State");
+                CheckBox beginCheck = new CheckBox("Začiatočný");
                 beginCheck.setSelected(state.isStateBegin());
-                CheckBox endCheck = new CheckBox("Ending State");
+                CheckBox endCheck = new CheckBox("Koncový");
                 endCheck.setSelected(state.isStateEnd());
 
-                // Add labels and controls to the grid.
-                grid.add(new Label("State name:"), 0, 0);
+                grid.add(new Label("Nové meno stavu:"), 0, 0);
                 grid.add(nameField, 1, 0);
                 grid.add(beginCheck, 1, 1);
                 grid.add(endCheck, 1, 2);
 
                 dialog.getDialogPane().setContent(grid);
 
-                // Add OK and Cancel buttons.
                 dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
-                // Show the dialog and wait for user input.
                 Optional<ButtonType> result = dialog.showAndWait();
                 if (result.isPresent() && result.get() == ButtonType.OK) {
-                    // Update the state with the new values.
                     state.setStateName(nameField.getText());
                     state.setStateBegin(beginCheck.isSelected());
                     state.setStateEnd(endCheck.isSelected());

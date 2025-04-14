@@ -51,10 +51,17 @@ public class View1Controller implements Initializable {
         this.graph = new Graph();
         this.graphModel = graph.getModel();
 
-        Model.getInstance().automataChangedProperty().addListener((obs, oldVal, newVal) -> {
-            if (newVal) {
+        Model.getInstance().getViewFactory().getClientSelectedViewProperty().addListener(
+                (observable, oldValue, newValue) -> {
+                    if (Model.getInstance().getViewFactory().getClientSelectedViewProperty().get().equals("View1")) {
+                    updateVisualization();
+                    Model.getInstance().setUpdateView1(false);
+                    }
+                });
+        Model.getInstance().updateView1Property().addListener((obs, oldVal, newVal) -> {
+            if (newVal && Model.getInstance().getViewFactory().getClientSelectedViewProperty().get().equals("View1")) {
                 updateVisualization();
-                Model.getInstance().setAutomataChanged(false);
+                Model.getInstance().setUpdateView1(false);
             }
         });
 
@@ -113,7 +120,10 @@ public class View1Controller implements Initializable {
     }
 
     public void updateVisualization() {
+        System.out.println("Updating View1");
         updateAllStatePositions();
+        Model.getInstance().setUpdateView2(true);
+        Model.getInstance().setUpdateView3(true);
         Automata automata = Model.getInstance().getCurrentAutomata();
         graphModel.clear();
         graph.beginUpdate();
@@ -322,9 +332,9 @@ public class View1Controller implements Initializable {
 
             TextInputDialog dialog = new TextInputDialog();
             dialog.setTitle("Add New Edge");
-            dialog.setHeaderText("Enter symbols for the transition");
-            dialog.setContentText("Symbols (e.g., a, b):");
-            dialog.getEditor().setPromptText("Enter symbols here...");
+            dialog.setHeaderText("Zadaj symboly pre nový prechod");
+            dialog.setContentText("Symboly (a, b, ...):");
+            dialog.getEditor().setPromptText("Sem zadaj symboly ...");
             Optional<String> result = dialog.showAndWait();
             result.ifPresent(symbols -> {
                 Transition newTransition = new Transition(source, symbols, target);
@@ -360,7 +370,6 @@ public class View1Controller implements Initializable {
                 updateVisualization();
             }
         });
-
     }
 
     private void addButtonStyles() {

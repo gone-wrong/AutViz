@@ -12,7 +12,10 @@ public class Model {
     private final BooleanProperty deleteStateMode = new SimpleBooleanProperty(false);
     private final BooleanProperty deleteEdgeMode = new SimpleBooleanProperty(false);
     private final BooleanProperty addEdgeMode = new SimpleBooleanProperty(false);
-    private final BooleanProperty automataChanged = new SimpleBooleanProperty(false);
+
+    private final BooleanProperty updateView1 = new SimpleBooleanProperty(false);
+    private final BooleanProperty updateView2 = new SimpleBooleanProperty(false);
+    private final BooleanProperty updateView3 = new SimpleBooleanProperty(false);
 
 
     private Model() {
@@ -113,13 +116,39 @@ public class Model {
         addEdgeMode.set(false);
     }
 
-    public BooleanProperty automataChangedProperty() {
-        return automataChanged;
+    public BooleanProperty updateView1Property() {
+        return updateView1;
     }
-    public boolean isAutomataChanged() {
-        return automataChanged.get();
+
+    public boolean isUpdateView1() {
+        return updateView1.get();
     }
-    public void setAutomataChanged(boolean value) {
-        automataChanged.set(value);
+
+    public void setUpdateView1(boolean value) {
+        updateView1.set(value);
+    }
+
+    public BooleanProperty updateView2Property() {
+        return updateView2;
+    }
+
+    public boolean isUpdateView2() {
+        return updateView2.get();
+    }
+
+    public void setUpdateView2(boolean value) {
+        updateView2.set(value);
+    }
+
+    public BooleanProperty updateView3Property() {
+        return updateView3;
+    }
+
+    public boolean isUpdateView3() {
+        return updateView3.get();
+    }
+
+    public void setUpdateView3(boolean value) {
+        updateView3.set(value);
     }
 }

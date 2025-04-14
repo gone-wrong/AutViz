@@ -177,7 +177,7 @@ public class DirectedLoopGraphic extends Region {
             }
             if (Model.getInstance().isDeleteEdgeMode()) {
                 Model.getInstance().getCurrentAutomata().removeTransition(edge.getTransition());
-                Model.getInstance().setAutomataChanged(true);
+                Model.getInstance().setUpdateView1(true);
             }
         });
 

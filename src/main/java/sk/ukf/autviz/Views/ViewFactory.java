@@ -16,7 +16,7 @@ public class ViewFactory {
     private AnchorPane View3;
 
     public ViewFactory() {
-        this.clientSelectedView = new SimpleStringProperty();
+        this.clientSelectedView = new SimpleStringProperty("View1");
     }
 
     public StringProperty getClientSelectedViewProperty() {

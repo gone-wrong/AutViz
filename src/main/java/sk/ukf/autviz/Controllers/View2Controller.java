@@ -41,6 +41,8 @@ public class View2Controller implements Initializable {
         Automata automata = Model.getInstance().getCurrentAutomata();
 
         buildTransitionTable(automata);
+        addButtonListeners();
+        addButtonStyles();
 
         transition_table.prefHeightProperty().bind(Bindings.size(transition_table.getItems())
                 .multiply(FIXED_CELL_SIZE)
@@ -61,7 +63,6 @@ public class View2Controller implements Initializable {
             @Override
             protected void updateItem(String item, boolean empty) {
                 super.updateItem(item, empty);
-                // Always unbind any previous binding.
                 textProperty().unbind();
                 if (empty || getTableRow() == null || getTableRow().getItem() == null) {
                     setText(null);
@@ -69,7 +70,6 @@ public class View2Controller implements Initializable {
                     setStyle("");
                 } else {
                     TransitionRow row = getTableRow().getItem();
-                    // Bind the cell's textProperty so that it reflects changes in the state.
                     textProperty().bind(Bindings.createStringBinding(
                             () -> decorateStateName(
                                     row.getSource().nameProperty().get(),
@@ -103,7 +103,6 @@ public class View2Controller implements Initializable {
                     setStyle("");
                 } else {
                     TransitionRow row = getTableRow().getItem();
-                    // Bind the cell's textProperty for the destination state.
                     textProperty().bind(Bindings.createStringBinding(
                             () -> decorateStateName(
                                     row.getDestination().nameProperty().get(),
@@ -139,7 +138,6 @@ public class View2Controller implements Initializable {
             this.destination = destination;
         }
 
-        // These getters return the observable properties from the model objects.
         public StringProperty sourceProperty() {
             return source.nameProperty();
         }
@@ -159,5 +157,120 @@ public class View2Controller implements Initializable {
         public State getDestination() {
             return destination;
         }
+    }
+
+    public class NewStateData {
+        private final String name;
+        private final boolean begin;
+        private final boolean end;
+
+        public NewStateData(String name, boolean begin, boolean end) {
+            this.name = name;
+            this.begin = begin;
+            this.end = end;
+        }
+
+        public String getName() {
+            return name;
+        }
+
+        public boolean isBegin() {
+            return begin;
+        }
+
+        public boolean isEnd() {
+            return end;
+        }
+    }
+
+    private void addButtonStyles() {
+        edit_mode_button.styleProperty().bind(
+                javafx.beans.binding.Bindings.when(Model.getInstance().editModeProperty())
+                        .then("-fx-background-color: #66cc66; -fx-text-fill: white;")
+                        .otherwise("")
+        );
+
+        delete_state_button.styleProperty().bind(
+                javafx.beans.binding.Bindings.when(Model.getInstance().deleteStateModeProperty())
+                        .then("-fx-background-color: #66cc66; -fx-text-fill: white;")
+                        .otherwise("")
+        );
+
+        delete_edge_button.styleProperty().bind(
+                javafx.beans.binding.Bindings.when(Model.getInstance().deleteEdgeModeProperty())
+                        .then("-fx-background-color: #66cc66; -fx-text-fill: white;")
+                        .otherwise("")
+        );
+
+        add_edge_button.styleProperty().bind(
+                javafx.beans.binding.Bindings.when(Model.getInstance().addEdgeModeProperty())
+                        .then("-fx-background-color: #66cc66; -fx-text-fill: white;")
+                        .otherwise("")
+        );
+    }
+
+    private void addButtonListeners() {
+        add_state_button.setOnAction(event -> {
+            // Disable any other modes
+            Model.getInstance().disableModes();
+
+            // Create a new Dialog to add state information
+            javafx.scene.control.Dialog<NewStateData> dialog = new javafx.scene.control.Dialog<>();
+            dialog.setTitle("Add New State");
+            dialog.setHeaderText("Enter details for the new state:");
+
+            // Set the button types.
+            javafx.scene.control.ButtonType addButtonType = new javafx.scene.control.ButtonType("Add", javafx.scene.control.ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(addButtonType, javafx.scene.control.ButtonType.CANCEL);
+
+            javafx.scene.layout.GridPane grid = new javafx.scene.layout.GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+
+            javafx.scene.control.TextField nameField = new javafx.scene.control.TextField();
+            nameField.setPromptText("State name");
+
+            javafx.scene.control.CheckBox beginCheckBox = new javafx.scene.control.CheckBox("Začiatočný");
+            javafx.scene.control.CheckBox endCheckBox = new javafx.scene.control.CheckBox("Koncový");
+
+            grid.add(new javafx.scene.control.Label("Name:"), 0, 0);
+            grid.add(nameField, 1, 0);
+            grid.add(beginCheckBox, 0, 1);
+            grid.add(endCheckBox, 1, 1);
+
+            dialog.getDialogPane().setContent(grid);
+
+            javafx.scene.Node addButton = dialog.getDialogPane().lookupButton(addButtonType);
+            addButton.setDisable(true);
+            nameField.textProperty().addListener((obs, oldText, newText) -> {
+                addButton.setDisable(newText.trim().isEmpty());
+            });
+
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == addButtonType) {
+                    String stateName = nameField.getText().trim();
+                    boolean isBegin = beginCheckBox.isSelected();
+                    boolean isEnd = endCheckBox.isSelected();
+                    return new NewStateData(stateName, isBegin, isEnd);
+                }
+                return null;
+            });
+
+            java.util.Optional<NewStateData> result = dialog.showAndWait();
+            result.ifPresent(newStateData -> {
+                State newState = new State(newStateData.getName());
+                newState.setStateBegin(newStateData.isBegin());
+                newState.setStateEnd(newStateData.isEnd());
+
+                Model.getInstance().getCurrentAutomata().addState(newState);
+
+                Model.getInstance().setUpdateView1(true);
+                Model.getInstance().setUpdateView3(true);
+            });
+        });
+
+        delete_state_button.setOnAction(event -> {
+            System.out.println(Model.getInstance().getCurrentAutomata().toString());
+        });
     }
 }
