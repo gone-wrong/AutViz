@@ -483,10 +483,19 @@ private void buildTransitionTable(Automata automata) {
 
             Optional<NewStateData> result = dialog.showAndWait();
             result.ifPresent(newStateData -> {
-                State newState = new State(newStateData.getName());
+                String stateName = newStateData.getName();
+                State newState = new State(stateName);
                 newState.setStateBegin(newStateData.isBegin());
                 newState.setStateEnd(newStateData.isEnd());
 
+                if (newState.isDuplicateIn(Model.getInstance().getCurrentAutomata().getStates())) {
+                    javafx.scene.control.Alert duplicateAlert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR);
+                    duplicateAlert.setTitle("Duplicate State");
+                    duplicateAlert.setHeaderText(null);
+                    duplicateAlert.setContentText("Stav s menom \"" + stateName + "\" už existuje. Prosím, zvoľ iné meno.");
+                    duplicateAlert.showAndWait();
+                    return;
+                }
                 Model.getInstance().getCurrentAutomata().addState(newState);
 
                 Model.getInstance().setUpdateView1(true);

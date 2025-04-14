@@ -3,11 +3,8 @@ package sk.ukf.autviz.Utils;
 import com.fxgraph.cells.AbstractCell;
 import com.fxgraph.graph.Graph;
 import javafx.geometry.Insets;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Dialog;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.Region;
@@ -102,17 +99,43 @@ public class CircleCell extends AbstractCell {
                 grid.add(endCheck, 1, 2);
 
                 dialog.getDialogPane().setContent(grid);
-
                 dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
+
+                Node okButton = dialog.getDialogPane().lookupButton(ButtonType.OK);
+                okButton.setDisable(true);
+
+                nameField.textProperty().addListener((obs, oldText, newText) -> {
+                    String trimmed = newText.trim();
+                    boolean disable = trimmed.isEmpty() || isDuplicate(trimmed, state);
+                    okButton.setDisable(disable);
+                });
 
                 Optional<ButtonType> result = dialog.showAndWait();
                 if (result.isPresent() && result.get() == ButtonType.OK) {
-                    state.setStateName(nameField.getText());
+                    String newName = nameField.getText().trim();
+                    if (newName.isEmpty() || isDuplicate(newName, state)) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Invalid State Name");
+                        alert.setHeaderText(null);
+                        alert.setContentText("Meno stavu nemôže byť prázdne alebo duplicitné.");
+                        alert.showAndWait();
+                        return;
+                    }
+                    state.setStateName(newName);
                     state.setStateBegin(beginCheck.isSelected());
                     state.setStateEnd(endCheck.isSelected());
                 }
             }
         });
+    }
+
+    private boolean isDuplicate(String name, State currentState) {
+        for (State s : Model.getInstance().getCurrentAutomata().getStates()) {
+            if (s != currentState && s.getName().equalsIgnoreCase(name)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public State getState() {

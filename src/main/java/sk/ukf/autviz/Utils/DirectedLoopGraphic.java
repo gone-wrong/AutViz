@@ -174,6 +174,7 @@ public class DirectedLoopGraphic extends Region {
                 result.ifPresent(newSymbols -> {
                     edge.getTransition().setSymbols(newSymbols);
                 });
+                Model.getInstance().getCurrentAutomata().updateAlphabet();
             }
             if (Model.getInstance().isDeleteEdgeMode()) {
                 Model.getInstance().getCurrentAutomata().removeTransition(edge.getTransition());

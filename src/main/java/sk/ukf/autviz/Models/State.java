@@ -69,4 +69,13 @@ public class State implements Comparable<State> {
     public int hashCode() {
         return Objects.hashCode(stateName);
     }
+
+    public boolean isDuplicateIn(Iterable<State> existingStates) {
+        for (State s : existingStates) {
+            if (s.getName().equals(this.getName())) {  // or use equals() if you want to be extra sure
+                return true;
+            }
+        }
+        return false;
+    }
 }

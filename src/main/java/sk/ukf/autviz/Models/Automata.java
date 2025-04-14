@@ -16,8 +16,14 @@ public class Automata {
         this.transitions.clear();
     }
 
-    public void addAlphabet(String character) {
-        this.alphabet.add(character);
+    public void updateAlphabet() {
+        // Clear the alphabet
+        alphabet.clear();
+
+        // Iterate over all transitions and collect their symbols.
+        for (Transition t : transitions) {
+            alphabet.addAll(t.getSymbols());
+        }
     }
 
     public void addState(State state) {
@@ -41,6 +47,7 @@ public class Automata {
                     existing.setHasOpposite(true);
                     newTransition.setHasOpposite(true);
                 }
+                updateAlphabet();
                 return;
             }
 
@@ -52,6 +59,7 @@ public class Automata {
         }
 
         transitions.add(newTransition);
+        updateAlphabet();
     }
 
     public Set<String> getAlphabet() {
@@ -95,6 +103,7 @@ public class Automata {
             for (Transition t : remainingTransitions) {
                 t.updateOppositeStatus(remainingTransitions);
             }
+            updateAlphabet();
         }
     }
     

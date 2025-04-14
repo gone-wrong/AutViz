@@ -5,8 +5,12 @@ import com.fxgraph.cells.AbstractCell;
 import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.ICell;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Region;
@@ -125,7 +129,6 @@ public class View1Controller implements Initializable {
     }
 
     public void updateVisualization() {
-        System.out.println("Updating View1");
         updateAllStatePositions();
         Automata automata = Model.getInstance().getCurrentAutomata();
         graphModel.clear();
@@ -212,10 +215,6 @@ public class View1Controller implements Initializable {
 //        a.addState(q13);
 //        a.addState(q14);
 
-        a.addAlphabet("a");
-        a.addAlphabet("b");
-        a.addAlphabet("c");
-
         // testovanie curved DirectedEdge
         a.addTransition(new Transition(q1, "b", q0));
         a.addTransition(new Transition(q2, "aaaaaa", q0));
@@ -293,19 +292,38 @@ public class View1Controller implements Initializable {
             dialog.setContentText("Meno stavu:");
             dialog.getEditor().setPromptText("...");
 
+            Node okButton = dialog.getDialogPane().lookupButton(ButtonType.OK);
+            okButton.setDisable(true);
+
+            dialog.getEditor().textProperty().addListener((obs, oldText, newText) -> {
+                okButton.setDisable(newText.trim().isEmpty());
+            });
+
             Optional<String> result = dialog.showAndWait();
             if (result.isEmpty()) {
                 return;
             }
 
-            String name = result.get();
-            if (!name.trim().isEmpty()) {
-                newStateName = name.trim();
-            } else {
-                newStateName = "";
+            String name = result.get().trim();
+            if (name.isEmpty()) {
+                Alert emptyAlert = new Alert(Alert.AlertType.ERROR);
+                emptyAlert.setTitle("Invalid State Name");
+                emptyAlert.setHeaderText(null);
+                emptyAlert.setContentText("Meno stavu nemôže byť prázdne. Prosím zadaj platné meno.");
+                emptyAlert.showAndWait();
+                return;
             }
 
-            State newState = new State(newStateName);
+            State newState = new State(name);
+
+            if (newState.isDuplicateIn(Model.getInstance().getCurrentAutomata().getStates())) {
+                Alert duplicateAlert = new Alert(Alert.AlertType.ERROR);
+                duplicateAlert.setTitle("Duplicate State");
+                duplicateAlert.setHeaderText(null);
+                duplicateAlert.setContentText("Stav s menom \"" + name + "\" už existuje. Prosím, zvoľ iné meno.");
+                duplicateAlert.showAndWait();
+                return;
+            }
 
             Model.getInstance().getCurrentAutomata().addState(newState);
 
@@ -360,7 +378,7 @@ public class View1Controller implements Initializable {
     }
 
     private void attachClickHandlers(Region graphicNode, State state) {
-        graphicNode.setOnMouseClicked(event -> {
+        graphicNode.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> {
             if (Model.getInstance().isAddEdgeMode()) {
                 processStateCellClick(state);
                 event.consume();
