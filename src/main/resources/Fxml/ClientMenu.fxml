@@ -9,16 +9,15 @@
 
 <VBox fx:id="client_menu" maxHeight="730" maxWidth="-Infinity" minHeight="550" minWidth="-Infinity" prefHeight="730.0" prefWidth="180.0" styleClass="main_menu_container" stylesheets="@../Styles/ClientMenu.css" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.ukf.autviz.Controllers.ClientMenuController">
    <AnchorPane prefHeight="730.0" prefWidth="160.0" styleClass="left_container">
-      <HBox prefHeight="80.0" prefWidth="160.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0"
-            AnchorPane.topAnchor="0.0">
+      <HBox prefHeight="80.0" prefWidth="160.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <Button mnemonicParsing="false">
             <graphic>
-               <FontAwesomeIconView glyphName="SAVE"/>
+               <FontAwesomeIconView glyphName="SAVE" />
             </graphic>
          </Button>
          <Button mnemonicParsing="false">
             <graphic>
-               <FontAwesomeIconView glyphName="SPINNER"/>
+               <FontAwesomeIconView glyphName="SPINNER" />
             </graphic>
          </Button>
       </HBox>

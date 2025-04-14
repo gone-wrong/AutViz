@@ -3,6 +3,7 @@ package sk.ukf.autviz.Controllers;
 import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.ICell;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
@@ -14,6 +15,12 @@ import sk.ukf.autviz.Models.Transition;
 import sk.ukf.autviz.Models.Model;
 import sk.ukf.autviz.Utils.CircleCell;
 import sk.ukf.autviz.Utils.DirectedEdge;
+import javafx.scene.layout.GridPane;
+import java.util.Optional;
+import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import javafx.scene.control.*;
 
 import java.net.URL;
 import java.util.*;
@@ -21,8 +28,6 @@ import java.util.*;
 public class View3Controller implements Initializable {
 
     public AnchorPane view3_parent;
-    public Button add_state_button;
-    public Button delete_state_button;
     public Button add_edge_button;
     public Button delete_edge_button;
     public Button edit_mode_button;
@@ -37,6 +42,28 @@ public class View3Controller implements Initializable {
         Automata automata = Model.getInstance().getCurrentAutomata();
         StateTreeNode rootNode = buildStateTree(automata);
         drawStateTree(rootNode);
+
+        // Vyvolane zmenou na View3 a View3 sa ma updatnut
+        Model.getInstance().getViewFactory().getClientSelectedViewProperty().addListener(
+                (observable, oldValue, newValue) -> {
+                    if (Model.getInstance().getViewFactory().getClientSelectedViewProperty().get().equals("View3")
+                            && Model.getInstance().isUpdateView3()) {
+                        drawStateTree(buildStateTree(automata));
+                        Model.getInstance().setUpdateView3(false);
+                    }
+                });
+        // Vyvolane zmenou updateView3 property na true a sme vo View3
+        Model.getInstance().updateView1Property().addListener((obs, oldVal, newVal) -> {
+            if (newVal && Model.getInstance().getViewFactory().getClientSelectedViewProperty().get().equals("View3")) {
+                drawStateTree(buildStateTree(automata));
+                Model.getInstance().setUpdateView2(true);
+                Model.getInstance().setUpdateView1(true);
+                Model.getInstance().setUpdateView3(false);
+            }
+        });
+
+        addButtonListeners();
+        addButtonStyles();
     }
 
     private StateTreeNode buildStateTree(Automata automata) {
@@ -82,8 +109,11 @@ public class View3Controller implements Initializable {
     }
 
     private void drawStateTree(StateTreeNode root) {
+        tree_region.getChildren().clear();
+
         graph = new Graph();
         graphModel = graph.getModel();
+        graphModel.clear();
         graph.beginUpdate();
 
         // mapa nodov stromu a ich grafických reprezentácií
@@ -153,6 +183,181 @@ public class View3Controller implements Initializable {
             cell.getGraphic(null).setLayoutX(x);
             cell.getGraphic(null).setLayoutY(y);
             posWrapper.value += HORIZONTAL_SPACING;
+        }
+    }
+
+    private void addButtonStyles() {
+        edit_mode_button.styleProperty().bind(
+                javafx.beans.binding.Bindings.when(Model.getInstance().editModeProperty())
+                        .then("-fx-background-color: #66cc66; -fx-text-fill: white;")
+                        .otherwise("")
+        );
+
+        delete_edge_button.styleProperty().bind(
+                javafx.beans.binding.Bindings.when(Model.getInstance().deleteEdgeModeProperty())
+                        .then("-fx-background-color: #66cc66; -fx-text-fill: white;")
+                        .otherwise("")
+        );
+
+        add_edge_button.styleProperty().bind(
+                javafx.beans.binding.Bindings.when(Model.getInstance().addEdgeModeProperty())
+                        .then("-fx-background-color: #66cc66; -fx-text-fill: white;")
+                        .otherwise("")
+        );
+    }
+
+    private void addButtonListeners() {
+        add_edge_button.setOnAction(event -> {
+            // Disable other modes while adding an edge.
+            Model.getInstance().disableModes();
+
+            // Create the dialog for adding a new edge.
+            Dialog<EdgeData> dialog = new Dialog<>();
+            dialog.setTitle("Add New Transition");
+            dialog.setHeaderText("Vyber a zadaj detaily pre nový prechod:");
+
+            // Set up the dialog buttons.
+            ButtonType okButtonType = new ButtonType("OK", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(okButtonType, ButtonType.CANCEL);
+
+            // Create a GridPane and add controls.
+            GridPane grid = new GridPane();
+            grid.setHgap(10);
+            grid.setVgap(10);
+
+            // ComboBox for the source state.
+            ComboBox<State> sourceCombo = new ComboBox<>();
+            sourceCombo.getItems().addAll(Model.getInstance().getCurrentAutomata().getStates());
+            // Configure the cell factory so the state is shown by its name.
+            sourceCombo.setCellFactory(param -> new ListCell<>() {
+                @Override
+                protected void updateItem(State item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty || item == null ? null : item.getName());
+                }
+            });
+            sourceCombo.setButtonCell(new ListCell<>() {
+                @Override
+                protected void updateItem(State item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty || item == null ? null : item.getName());
+                }
+            });
+            sourceCombo.setPromptText("Vyber 1. stav");
+
+            // TextField for transition symbol(s).
+            TextField symbolField = new TextField();
+            symbolField.setPromptText("a,b, ...");
+
+            // ComboBox for the target state.
+            ComboBox<State> targetCombo = new ComboBox<>();
+            targetCombo.getItems().addAll(Model.getInstance().getCurrentAutomata().getStates());
+            targetCombo.setCellFactory(param -> new ListCell<>() {
+                @Override
+                protected void updateItem(State item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty || item == null ? null : item.getName());
+                }
+            });
+            targetCombo.setButtonCell(new ListCell<>() {
+                @Override
+                protected void updateItem(State item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setText(empty || item == null ? null : item.getName());
+                }
+            });
+            targetCombo.setPromptText("Vyber 2. stav");
+
+            // Add the controls to the grid.
+            grid.add(new Label("Stav 1:"), 0, 0);
+            grid.add(sourceCombo, 1, 0);
+            grid.add(new Label("Symboly:"), 0, 1);
+            grid.add(symbolField, 1, 1);
+            grid.add(new Label("Stav 2:"), 0, 2);
+            grid.add(targetCombo, 1, 2);
+
+            dialog.getDialogPane().setContent(grid);
+
+            // Enable/Disable OK button based on whether all required fields are filled.
+            Node okButton = dialog.getDialogPane().lookupButton(okButtonType);
+            okButton.setDisable(true);
+
+            // Listen for changes in the text field and combo boxes.
+            symbolField.textProperty().addListener((observable, oldValue, newValue) -> {
+                okButton.setDisable(newValue.trim().isEmpty()
+                        || sourceCombo.getValue() == null
+                        || targetCombo.getValue() == null);
+            });
+            sourceCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+                okButton.setDisable(symbolField.getText().trim().isEmpty()
+                        || newVal == null
+                        || targetCombo.getValue() == null);
+            });
+            targetCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
+                okButton.setDisable(symbolField.getText().trim().isEmpty()
+                        || sourceCombo.getValue() == null
+                        || newVal == null);
+            });
+
+            // Convert the dialog result to a NewEdgeData object when OK is clicked.
+            dialog.setResultConverter(dialogButton -> {
+                if (dialogButton == okButtonType) {
+                    return new EdgeData(sourceCombo.getValue(), symbolField.getText(), targetCombo.getValue());
+                }
+                return null;
+            });
+
+            Optional<EdgeData> result = dialog.showAndWait();
+            result.ifPresent(data -> {
+                if (data.getSource() != null && data.getTarget() != null && !data.getSymbols().trim().isEmpty()) {
+                    // Create and add the new transition.
+                    Transition newTransition = new Transition(data.getSource(), data.getSymbols(), data.getTarget());
+                    Model.getInstance().getCurrentAutomata().addTransition(newTransition);
+                    // Refresh the tree view by rebuilding the state tree and redrawing it.
+                    StateTreeNode newRoot = buildStateTree(Model.getInstance().getCurrentAutomata());
+                    drawStateTree(newRoot);
+                    // Optionally update any related view update flags.
+                    Model.getInstance().setUpdateView1(true);
+                    Model.getInstance().setUpdateView3(true);
+                }
+            });
+        });
+
+        delete_edge_button.setOnAction(event -> {
+            boolean currentMode = Model.getInstance().isDeleteEdgeMode();
+            boolean newMode = !currentMode;
+            Model.getInstance().setDeleteEdgeMode(newMode);
+            System.out.println("DeleteEdgeMode is " + newMode);
+        });
+
+        edit_mode_button.setOnAction(event -> {
+            boolean currentMode = Model.getInstance().isEditMode();
+            boolean newMode = !currentMode;
+            Model.getInstance().setEditMode(newMode);
+            System.out.println("EditMode is " + newMode);
+        });
+    }
+
+    public static class EdgeData {
+        public State source;
+        public String symbols;
+        public State target;
+        public EdgeData(State source, String symbols, State target) {
+            this.source = source;
+            this.symbols = symbols;
+            this.target = target;
+        }
+
+        public State getSource() {
+            return source;
+        }
+
+        public String getSymbols() {
+            return symbols;
+        }
+
+        public State getTarget() {
+            return target;
         }
     }
 }

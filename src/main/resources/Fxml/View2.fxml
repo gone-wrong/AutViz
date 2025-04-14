@@ -13,8 +13,6 @@
       <Button fx:id="add_state_button" mnemonicParsing="false" text="AddState" />
       <Button fx:id="delete_state_button" mnemonicParsing="false" text="DeleteState" />
       <Button fx:id="add_edge_button" mnemonicParsing="false" text="AddEdge" />
-      <Button fx:id="delete_edge_button" mnemonicParsing="false" text="DeleteEdge" />
-      <Button fx:id="edit_mode_button" mnemonicParsing="false" text="Edit" />
    </HBox>
    <AnchorPane fx:id="table_region" prefHeight="700.0" prefWidth="850.0" AnchorPane.bottomAnchor="0.0"
                AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="50.0">

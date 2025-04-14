@@ -51,16 +51,21 @@ public class View1Controller implements Initializable {
         this.graph = new Graph();
         this.graphModel = graph.getModel();
 
+        // Vyvolane zmenou na View1 a View1 sa ma updatnut
         Model.getInstance().getViewFactory().getClientSelectedViewProperty().addListener(
                 (observable, oldValue, newValue) -> {
-                    if (Model.getInstance().getViewFactory().getClientSelectedViewProperty().get().equals("View1")) {
+                    if (Model.getInstance().getViewFactory().getClientSelectedViewProperty().get().equals("View1")
+                    && Model.getInstance().isUpdateView1()) {
                     updateVisualization();
                     Model.getInstance().setUpdateView1(false);
                     }
                 });
+        // Vyvolane zmenou updateView1 property na true a sme vo View1
         Model.getInstance().updateView1Property().addListener((obs, oldVal, newVal) -> {
             if (newVal && Model.getInstance().getViewFactory().getClientSelectedViewProperty().get().equals("View1")) {
                 updateVisualization();
+                Model.getInstance().setUpdateView2(true);
+                Model.getInstance().setUpdateView3(true);
                 Model.getInstance().setUpdateView1(false);
             }
         });
@@ -122,8 +127,6 @@ public class View1Controller implements Initializable {
     public void updateVisualization() {
         System.out.println("Updating View1");
         updateAllStatePositions();
-        Model.getInstance().setUpdateView2(true);
-        Model.getInstance().setUpdateView3(true);
         Automata automata = Model.getInstance().getCurrentAutomata();
         graphModel.clear();
         graph.beginUpdate();
@@ -312,6 +315,8 @@ public class View1Controller implements Initializable {
             attachClickHandlers(graphicNode, newState);
             StateCellData cellData = new StateCellData(newStateCell, graphicNode);
             stateMapping.put(newState, cellData);
+            Model.getInstance().setUpdateView2(true);
+            Model.getInstance().setUpdateView3(true);
             updateVisualization();
         });
     }
@@ -339,6 +344,8 @@ public class View1Controller implements Initializable {
             result.ifPresent(symbols -> {
                 Transition newTransition = new Transition(source, symbols, target);
                 Model.getInstance().getCurrentAutomata().addTransition(newTransition);
+                Model.getInstance().setUpdateView2(true);
+                Model.getInstance().setUpdateView3(true);
                 updateVisualization();
             });
             StateCellData sourceData = stateMapping.get(selectedEdgeSource);
@@ -367,6 +374,8 @@ public class View1Controller implements Initializable {
                 );
                 automata.removeState(state);
                 stateMapping.remove(state);
+                Model.getInstance().setUpdateView2(true);
+                Model.getInstance().setUpdateView3(true);
                 updateVisualization();
             }
         });
@@ -397,5 +406,4 @@ public class View1Controller implements Initializable {
                         .otherwise("")
         );
     }
-
 }

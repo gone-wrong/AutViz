@@ -61,6 +61,7 @@ public class DirectedEdgeGraphic extends Region {
             if (Model.getInstance().isDeleteEdgeMode()) {
                 Model.getInstance().getCurrentAutomata().removeTransition(edge.getTransition());
                 Model.getInstance().setUpdateView1(true);
+                Model.getInstance().setUpdateView3(true);
             }
         });
 
