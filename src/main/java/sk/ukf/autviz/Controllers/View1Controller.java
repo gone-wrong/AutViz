@@ -22,6 +22,7 @@ import sk.ukf.autviz.Utils.DirectedEdge;
 import sk.ukf.autviz.Utils.DirectedLoop;
 
 import java.net.URL;
+import java.sql.SQLOutput;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -180,16 +181,27 @@ public class View1Controller implements Initializable {
     public void updateAllStatePositions() {
         for (Map.Entry<State, StateCellData> entry : Model.getInstance().getStateMapping().entrySet()) {
             StateCellData cellData = entry.getValue();
-            Region graphicNode = cellData.getCell().getGraphic(graph);
+            Region graphicNode;
+            if (cellData == null) {
+                State currentState = entry.getKey();
+                AbstractCell cell = new CircleCell(currentState, true);
+                graphModel.addCell(cell);
+                graphicNode = cell.getGraphic(graph);
+                attachClickHandlers(graphicNode, currentState);
+                cellData = new StateCellData(cell, graphicNode);
+                Model.getInstance().getStateMapping().put(currentState, cellData);
+            } else {
+                graphicNode = cellData.getCell().getGraphic(graph);
+            }
             // current layout positions.
             double currentX = graphicNode.getLayoutX();
             double currentY = graphicNode.getLayoutY();
             // update the stored properties.
             cellData.setLayoutX(currentX);
             cellData.setLayoutY(currentY);
-//            System.out.println("Updated " + entry.getKey().getName()
-//                    + " -> X: " + currentX
-//                    + ", Y: " + currentY);
+            System.out.println("Updated " + entry.getKey().getName()
+                    + " -> X: " + currentX
+                    + ", Y: " + currentY);
         }
     }
 

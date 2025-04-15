@@ -266,6 +266,7 @@ public class ClientMenuController implements Initializable {
                 s.setStateEnd(stateData.getBoolean("end"));
                 a.addState(s);
                 tmpStates.put(s.getName(), s);
+                Model.getInstance().getStateMapping().put(s, null);
             }
         }
         for (Object o : data.getJSONArray("transitions")){
@@ -277,6 +278,7 @@ public class ClientMenuController implements Initializable {
             }
         }
         Model.getInstance().setCurrentAutomata(a);
+
         Model.getInstance().setUpdateView1(true);
         Model.getInstance().setUpdateStateMapping(true);
         Model.getInstance().setUpdateView2(true);
