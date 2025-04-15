@@ -3,7 +3,6 @@ module sk.ukf.autviz {
     requires javafx.fxml;
     requires de.jensd.fx.glyphs.fontawesome;
     requires javafx.graphics;
-    requires org.abego.treelayout.core;
     requires fxgraph;
     requires org.json;
     requires java.sql;

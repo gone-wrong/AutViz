@@ -85,7 +85,7 @@ public class State implements Comparable<State> {
 
     public boolean isDuplicateIn(Iterable<State> existingStates) {
         for (State s : existingStates) {
-            if (s.getName().equals(this.getName())) {  // or use equals() if you want to be extra sure
+            if (s.getName().equals(this.getName())) {
                 return true;
             }
         }

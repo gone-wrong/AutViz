@@ -27,12 +27,12 @@
       </HBox>
       <VBox prefHeight="325.0" prefWidth="160.0" styleClass="menu_container" AnchorPane.leftAnchor="0.0"
             AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="100.0">
-         <Button fx:id="view1_btn" mnemonicParsing="false" text="View1" />
-         <Button fx:id="view2_btn" mnemonicParsing="false" text="View2" />
-         <Button fx:id="view3_btn" mnemonicParsing="false" text="View3" />
+         <Button fx:id="view1_btn" mnemonicParsing="false" text="GraphView" />
+         <Button fx:id="view2_btn" mnemonicParsing="false" text="TableView" />
+         <Button fx:id="view3_btn" mnemonicParsing="false" text="TreeView" />
          <Line endX="120.0" />
-         <Button fx:id="determinize_btn" mnemonicParsing="false" styleClass="alt_menu_btn" text="Alg1" />
-         <Button fx:id="minimize_btn" mnemonicParsing="false" styleClass="alt_menu_btn" text="Alg2" />
+         <Button fx:id="determinize_btn" mnemonicParsing="false" styleClass="alt_menu_btn" text="Determinizovať" />
+         <Button fx:id="minimize_btn" mnemonicParsing="false" styleClass="alt_menu_btn" text="Minimalizovať" />
          <Line endX="120.0" />
          <Label text="Abeceda:" />
          <Label fx:id="alphabetLabel" text="" />

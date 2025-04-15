@@ -3,9 +3,6 @@ package sk.ukf.autviz.Models;
 import java.util.*;
 
 import javafx.util.Pair;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 
@@ -362,6 +359,9 @@ public class Automata {
             c++;
         }
         transitions = newTransitions;
+        for (Transition t : transitions){
+            t.updateOppositeStatus(transitions);
+        }
     }
 
     public void reverse(){
