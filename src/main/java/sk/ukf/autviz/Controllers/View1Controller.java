@@ -199,9 +199,9 @@ public class View1Controller implements Initializable {
             // update the stored properties.
             cellData.setLayoutX(currentX);
             cellData.setLayoutY(currentY);
-            System.out.println("Updated " + entry.getKey().getName()
-                    + " -> X: " + currentX
-                    + ", Y: " + currentY);
+//            System.out.println("Updated " + entry.getKey().getName()
+//                    + " -> X: " + currentX
+//                    + ", Y: " + currentY);
         }
     }
 

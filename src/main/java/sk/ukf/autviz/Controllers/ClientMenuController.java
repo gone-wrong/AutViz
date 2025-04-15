@@ -279,10 +279,7 @@ public class ClientMenuController implements Initializable {
         }
         Model.getInstance().setCurrentAutomata(a);
 
-        Model.getInstance().setUpdateView1(true);
         Model.getInstance().setUpdateStateMapping(true);
-        Model.getInstance().setUpdateView2(true);
-        Model.getInstance().setUpdateView3(true);
 
         for (Object o : data.getJSONArray("states")){
             if (o instanceof JSONObject){

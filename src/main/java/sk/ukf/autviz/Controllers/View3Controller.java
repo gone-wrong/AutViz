@@ -280,18 +280,15 @@ public class View3Controller implements Initializable {
             okButton.setDisable(true);
 
             symbolField.textProperty().addListener((observable, oldValue, newValue) -> {
-                okButton.setDisable(newValue.trim().isEmpty()
-                        || sourceCombo.getValue() == null
+                okButton.setDisable(sourceCombo.getValue() == null
                         || targetCombo.getValue() == null);
             });
             sourceCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-                okButton.setDisable(symbolField.getText().trim().isEmpty()
-                        || newVal == null
+                okButton.setDisable(newVal == null
                         || targetCombo.getValue() == null);
             });
             targetCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-                okButton.setDisable(symbolField.getText().trim().isEmpty()
-                        || sourceCombo.getValue() == null
+                okButton.setDisable(sourceCombo.getValue() == null
                         || newVal == null);
             });
 
@@ -304,7 +301,7 @@ public class View3Controller implements Initializable {
 
             Optional<EdgeData> result = dialog.showAndWait();
             result.ifPresent(data -> {
-                if (data.getSource() != null && data.getTarget() != null && !data.getSymbols().trim().isEmpty()) {
+                if (data.getSource() != null && data.getTarget() != null) {
                     Transition newTransition = new Transition(data.getSource(), data.getSymbols(), data.getTarget());
                     Model.getInstance().getCurrentAutomata().addTransition(newTransition);
                     StateTreeNode newRoot = buildStateTree(Model.getInstance().getCurrentAutomata());

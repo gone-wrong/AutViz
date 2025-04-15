@@ -441,17 +441,16 @@ private void buildTransitionTable(Automata automata) {
             Node okButton = dialog.getDialogPane().lookupButton(okButtonType);
             okButton.setDisable(true);
             symbolField.textProperty().addListener((observable, oldValue, newValue) -> {
-                okButton.setDisable(newValue.trim().isEmpty() ||
-                        sourceCombo.getValue() == null ||
+                okButton.setDisable(sourceCombo.getValue() == null ||
                         targetCombo.getValue() == null);
             });
             sourceCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-                okButton.setDisable(symbolField.getText().trim().isEmpty() ||
-                        newVal == null || targetCombo.getValue() == null);
+                okButton.setDisable(newVal == null ||
+                        targetCombo.getValue() == null);
             });
             targetCombo.valueProperty().addListener((obs, oldVal, newVal) -> {
-                okButton.setDisable(symbolField.getText().trim().isEmpty() ||
-                        sourceCombo.getValue() == null || newVal == null);
+                okButton.setDisable(sourceCombo.getValue() == null
+                        || newVal == null);
             });
 
             dialog.setResultConverter(dialogButton -> {
@@ -463,7 +462,7 @@ private void buildTransitionTable(Automata automata) {
 
             Optional<NewEdgeData> result = dialog.showAndWait();
             result.ifPresent(data -> {
-                if (data.getSource() != null && data.getTarget() != null && !data.getSymbols().trim().isEmpty()) {
+                if (data.getSource() != null && data.getTarget() != null) {
                     Transition newTransition = new Transition(data.getSource(), data.getSymbols(), data.getTarget());
                     Model.getInstance().getCurrentAutomata().addTransition(newTransition);
                     buildTransitionTable(Model.getInstance().getCurrentAutomata());
