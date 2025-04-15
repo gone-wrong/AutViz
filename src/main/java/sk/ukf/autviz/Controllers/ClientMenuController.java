@@ -243,7 +243,7 @@ public class ClientMenuController implements Initializable {
                 while ((line = br.readLine()) != null) {
                     stringData.append(line);
                 }
-            } catch (Exception e){
+            } catch (Exception e) {
                 //TODO
             }
         } else {

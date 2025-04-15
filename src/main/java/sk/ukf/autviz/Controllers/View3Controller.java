@@ -68,6 +68,9 @@ public class View3Controller implements Initializable {
     }
 
     private StateTreeNode buildStateTree(Automata automata) {
+        if (automata.getStates().isEmpty()) {
+            return null;
+        }
         Set<String> expanded = new HashSet<>();
         List<State> beginStates = new ArrayList<>();
         for (State s : automata.getStates()) {
@@ -111,6 +114,9 @@ public class View3Controller implements Initializable {
 
     private void drawStateTree(StateTreeNode root) {
         tree_region.getChildren().clear();
+        if (root == null) {
+            return;
+        }
 
         graph = new Graph();
         graphModel = graph.getModel();
