@@ -157,6 +157,7 @@ private void buildTransitionTable(Automata automata) {
                 }
             }
         }
+
         @Override
         public void commitEdit(String newValue) {
             newValue = newValue.replace("► ", "").replace(" !", "").trim();

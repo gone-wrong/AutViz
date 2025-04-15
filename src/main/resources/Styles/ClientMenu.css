@@ -4,7 +4,6 @@
     -fx-alignment: center;
 }
 
-/* Title section */
 .left_container {
     -fx-background-color: #FFFFFF;
     -fx-background-radius: 0 0 10 10;
@@ -27,7 +26,6 @@
     -fx-font-size: 2em;
 }
 
-/* Navigation section */
 .menu_container {
     -fx-padding: 10 10 10 20;
     -fx-spacing: 20;
@@ -65,38 +63,12 @@
     -fx-fill: #FFFFFF;
 }
 
-/* Bottom container section */
-
 .bottom_container {
     -fx-background-color: #EEFFEE;
     -fx-background-radius: 10;
     -fx-alignment: center;
     -fx-spacing: 10;
     -fx-padding: 10 0 10 0;
-}
-
-.bottom_container Text {
-    -fx-font-weight: bold;
-    -fx-fill: #132A13;
-}
-
-.bottom_container Label {
-    -fx-text-alignment: center;
-    -fx-wrap-text: true;
-}
-
-.bottom_container Button {
-    -fx-pref-width: 80;
-    -fx-background-color: #132A13;
-    -fx-text-fill: #FFFFFF;
-}
-
-.bottom_container Button:hover {
-    -fx-cursor: hand;
-}
-
-.bottom_container Button FontAwesomeIconView {
-    -fx-fill: #FFFFFF;
 }
 
 .left_container HBox {
@@ -125,4 +97,8 @@
 
 .left_container HBox Button:hover {
     -fx-background-color: #1e3b2f;
+}
+
+.menu_container HBox Button {
+    -fx-alignment: center;
 }

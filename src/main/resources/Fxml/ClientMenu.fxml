@@ -9,17 +9,17 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.shape.Line?>
 
-<VBox fx:id="client_menu" maxHeight="730" maxWidth="-Infinity" minHeight="550" minWidth="-Infinity" prefHeight="730.0"
-      prefWidth="180.0" styleClass="main_menu_container" stylesheets="@../Styles/ClientMenu.css"
+<VBox fx:id="client_menu" maxHeight="730" maxWidth="-Infinity" minHeight="730" minWidth="-Infinity"
+      prefWidth="200.0" styleClass="main_menu_container" stylesheets="@../Styles/ClientMenu.css"
       xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="sk.ukf.autviz.Controllers.ClientMenuController">
    <AnchorPane prefHeight="730.0" prefWidth="160.0" styleClass="left_container">
       <HBox prefHeight="80.0" prefWidth="160.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
-         <Button mnemonicParsing="false">
+         <Button fx:id="saveButton" mnemonicParsing="false">
             <graphic>
                <FontAwesomeIconView glyphName="SAVE" />
             </graphic>
          </Button>
-         <Button mnemonicParsing="false">
+         <Button fx:id="loadButton" mnemonicParsing="false">
             <graphic>
                <FontAwesomeIconView glyphName="SPINNER" />
             </graphic>
@@ -39,9 +39,9 @@
          <TextField fx:id="slovoField" promptText="Slovo" />
          <Button fx:id="spracovatButton" text="Vizualizovať" />
          <HBox fx:id="znakSlovoHBox" spacing="10" visible="false">
-            <Button fx:id="backButton" alignment="CENTER" contentDisplay="CENTER" text="-" textAlignment="CENTER" />
+            <Button fx:id="backButton" text="-" />
             <Button fx:id="forwardButton" text="+" />
-            <Button fx:id="cancelButton" mnemonicParsing="false" text="x" />
+            <Button fx:id="cancelButton" text="x" />
          </HBox>
       </VBox>
       <VBox prefHeight="100.0" prefWidth="160.0" styleClass="bottom_container" AnchorPane.bottomAnchor="0.0"

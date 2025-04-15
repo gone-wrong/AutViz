@@ -94,6 +94,7 @@ public class Automata {
             State states = entry.next();
             if (states.getName().equals(state.getName())) {
                 entry.remove();
+                updateAlphabet();
                 return;
             }
         }
@@ -479,7 +480,7 @@ public class Automata {
             List<Transition> availableTransitions = transitions.stream().filter(t -> t.getStateSource().getName().equals(state.getName()) && t.getSymbols().contains(letter)).toList();
             for (Transition t : availableTransitions){
                 endOfJourney = false;
-                Pair<List<State>, List<String>> tmpResult = getWholePathRec(word.substring(1), t.getStateDestination(), new LinkedHashSet<>(), currStateList, currWordList);
+                Pair<List<State>, List<String>> tmpResult = getWholePathRec(word.substring(1), t.getStateDestination(), new LinkedHashSet<>(), new ArrayList<>(currStateList), new ArrayList<>(currWordList));
                 result.getKey().addAll(tmpResult.getKey());
                 result.getValue().addAll(tmpResult.getValue());
             }
@@ -492,15 +493,13 @@ public class Automata {
                 continue;
             }
             endOfJourney = false;
-            Pair<List<State>, List<String>> tmpResult = getWholePathRec(word, t.getStateDestination(), epsilonTransitions, currStateList, currWordList);
+            Pair<List<State>, List<String>> tmpResult = getWholePathRec(word, t.getStateDestination(), epsilonTransitions, new ArrayList<>(currStateList), new ArrayList<>(currWordList));
             result.getKey().addAll(tmpResult.getKey());
             result.getValue().addAll(tmpResult.getValue());
         }
         if (endOfJourney){
             result = new Pair<>(new ArrayList<>(currStateList), new ArrayList<>(currWordList));
         }
-        currStateList.remove(state);
-        currWordList.remove(word);
         return result;
     }
 

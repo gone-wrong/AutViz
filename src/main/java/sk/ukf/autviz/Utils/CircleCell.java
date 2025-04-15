@@ -111,7 +111,6 @@ public class CircleCell extends AbstractCell {
                 dialog.getDialogPane().getButtonTypes().addAll(ButtonType.OK, ButtonType.CANCEL);
 
                 Node okButton = dialog.getDialogPane().lookupButton(ButtonType.OK);
-                okButton.setDisable(true);
 
                 nameField.textProperty().addListener((obs, oldText, newText) -> {
                     String trimmed = newText.trim();

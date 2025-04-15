@@ -21,7 +21,7 @@ public class Model {
     private final BooleanProperty updateView1 = new SimpleBooleanProperty(false);
     private final BooleanProperty updateView2 = new SimpleBooleanProperty(false);
     private final BooleanProperty updateView3 = new SimpleBooleanProperty(false);
-
+    private final BooleanProperty updateStateMapping = new SimpleBooleanProperty(false);
 
     private Model() {
         this.viewFactory = new ViewFactory();
@@ -43,6 +43,7 @@ public class Model {
 
     public void setCurrentAutomata(Automata automata) {
         this.currentAutomata = automata;
+        automata.updateAlphabet();
     }
 
     public ViewFactory getViewFactory() {
@@ -160,6 +161,18 @@ public class Model {
         updateView3.set(value);
     }
 
+    public BooleanProperty updateStateMappingProperty() {
+        return updateStateMapping;
+    }
+
+    public boolean isUpdateStateMapping() {
+        return updateStateMapping.get();
+    }
+
+    public void setUpdateStateMapping(boolean value) {
+        updateStateMapping.set(value);
+    }
+
     private Automata createSampleAutomaton() {
         Automata a = new Automata();
 
@@ -198,12 +211,10 @@ public class Model {
         return stateMapping;
     }
 
-    // Optionally, you can have a setter if needed.
     public void setStateMapping(Map<State, StateCellData> mapping) {
         this.stateMapping = mapping;
     }
 
-    // Convenience method to clear the mapping.
     public void clearStateMapping() {
         stateMapping.clear();
     }

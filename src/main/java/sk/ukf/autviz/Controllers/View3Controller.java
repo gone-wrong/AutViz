@@ -52,8 +52,9 @@ public class View3Controller implements Initializable {
                         Model.getInstance().setUpdateView3(false);
                     }
                 });
+
         // Vyvolane zmenou updateView3 property na true a sme vo View3
-        Model.getInstance().updateView1Property().addListener((obs, oldVal, newVal) -> {
+        Model.getInstance().updateView3Property().addListener((obs, oldVal, newVal) -> {
             if (newVal && Model.getInstance().getViewFactory().getClientSelectedViewProperty().get().equals("View3")) {
                 drawStateTree(buildStateTree(automata));
                 Model.getInstance().setUpdateView2(true);

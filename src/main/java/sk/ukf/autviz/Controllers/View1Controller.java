@@ -70,6 +70,13 @@ public class View1Controller implements Initializable {
             }
         });
 
+        Model.getInstance().updateStateMappingProperty().addListener((obs, oldVal, newVal) -> {
+            if(newVal) {
+                updateAllStatePositions();
+                Model.getInstance().setUpdateStateMapping(false);
+            }
+        });
+
         buildVisualization(automata);
         addButtonListeners();
         addButtonStyles();
