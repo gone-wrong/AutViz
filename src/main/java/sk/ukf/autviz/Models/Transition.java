@@ -5,7 +5,9 @@ import javafx.beans.property.StringProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.BooleanProperty;
 
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
 public class Transition {
@@ -68,14 +70,21 @@ public class Transition {
     }
 
     public void setSymbols(String symbolsStr) {
-        symbols.clear();
         String[] tokens = symbolsStr.split(",", -1);
+        List<String> processedTokens = new ArrayList<>();
+
         for (String token : tokens) {
             String processed = processSymbol(token);
             if (!processed.isEmpty()) {
-                symbols.add(processed);
+                processedTokens.add(processed);
             }
         }
+
+        if (!processedTokens.isEmpty()) {
+            symbols.clear();
+            symbols.addAll(processedTokens);
+        }
+
         updateCharacterWrapper();
     }
 

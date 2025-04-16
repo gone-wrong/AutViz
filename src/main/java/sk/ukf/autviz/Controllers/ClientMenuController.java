@@ -96,11 +96,10 @@ public class ClientMenuController implements Initializable {
     }
 
     private void onSpracovat() {
-        Model.getInstance().getViewFactory().getClientSelectedViewProperty().set("View1");
-        Model.getInstance().setVizMode(true);
-
         String word = slovoField.getText().trim();
         if (!word.isEmpty() && isWordValid(word)) {
+            Model.getInstance().getViewFactory().getClientSelectedViewProperty().set("View1");
+            Model.getInstance().setVizMode(true);
             znakSlovoHBox.setVisible(true);
             slovoField.setDisable(true);
             view1_btn.setDisable(true);

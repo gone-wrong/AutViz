@@ -4,10 +4,9 @@ import javafx.beans.value.ChangeListener;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.GridPane;
 import javafx.scene.Node;
-import java.util.Optional;
-import java.util.List;
-import java.util.Map;
-import java.util.HashMap;
+
+import java.util.*;
+
 import javafx.beans.binding.Bindings;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
@@ -23,7 +22,6 @@ import sk.ukf.autviz.Models.State;
 import sk.ukf.autviz.Models.Transition;
 
 import java.net.URL;
-import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
 public class View2Controller implements Initializable {
@@ -170,8 +168,8 @@ private void buildTransitionTable(Automata automata) {
             super.updateItem(item, empty);
             if (empty || getTableRow() == null || getTableRow().getItem() == null) {
                 if (currentRow != null) {
-                    currentRow.getSource().stateBeginProperty().removeListener(beginEndListener);
-                    currentRow.getSource().stateEndProperty().removeListener(beginEndListener);
+                    currentRow.getDestination().stateBeginProperty().removeListener(beginEndListener);
+                    currentRow.getDestination().stateEndProperty().removeListener(beginEndListener);
                     currentRow = null;
                 }
                 setText(null);
@@ -179,12 +177,12 @@ private void buildTransitionTable(Automata automata) {
                 TransitionRow row = getTableRow().getItem();
                 if (currentRow != row) {
                     if (currentRow != null) {
-                        currentRow.getSource().stateBeginProperty().removeListener(beginEndListener);
-                        currentRow.getSource().stateEndProperty().removeListener(beginEndListener);
+                        currentRow.getDestination().stateBeginProperty().removeListener(beginEndListener);
+                        currentRow.getDestination().stateEndProperty().removeListener(beginEndListener);
                     }
                     currentRow = row;
-                    currentRow.getSource().stateBeginProperty().addListener(beginEndListener);
-                    currentRow.getSource().stateEndProperty().addListener(beginEndListener);
+                    currentRow.getDestination().stateBeginProperty().addListener(beginEndListener);
+                    currentRow.getDestination().stateEndProperty().addListener(beginEndListener);
                 }
                 updateText();
             }
@@ -193,10 +191,10 @@ private void buildTransitionTable(Automata automata) {
         // Method to update the cell text based on the current state of the source.
         private void updateText() {
             if (currentRow != null) {
-                String rawName = currentRow.getSource().nameProperty().get();
+                String rawName = currentRow.getDestination().nameProperty().get();
                 setText(decorateStateName(rawName,
-                        currentRow.getSource().stateBeginProperty().get(),
-                        currentRow.getSource().stateEndProperty().get()));
+                        currentRow.getDestination().stateBeginProperty().get(),
+                        currentRow.getDestination().stateEndProperty().get()));
             }
         }
 
@@ -205,7 +203,7 @@ private void buildTransitionTable(Automata automata) {
             newValue = newValue.replace("► ", "").replace(" !", "").trim();
             super.commitEdit(newValue);
             TransitionRow row = getTableRow().getItem();
-            row.getSource().nameProperty().set(newValue);
+            row.getDestination().nameProperty().set(newValue);
             getTableView().refresh();
         }
 
@@ -214,10 +212,10 @@ private void buildTransitionTable(Automata automata) {
             super.cancelEdit();
             if (getTableRow() != null && getTableRow().getItem() != null) {
                 TransitionRow row = getTableRow().getItem();
-                String rawName = row.getSource().nameProperty().get();
+                String rawName = row.getDestination().nameProperty().get();
                 setText(decorateStateName(rawName,
-                        row.getSource().stateBeginProperty().get(),
-                        row.getSource().stateEndProperty().get()));
+                        row.getDestination().stateBeginProperty().get(),
+                        row.getDestination().stateEndProperty().get()));
             }
         }
     });
@@ -505,12 +503,24 @@ private void buildTransitionTable(Automata automata) {
             Optional<NewEdgeData> result = dialog.showAndWait();
             result.ifPresent(data -> {
                 if (data.getSource() != null && data.getTarget() != null) {
-                    Transition newTransition = new Transition(data.getSource(), data.getSymbols(), data.getTarget());
-                    Model.getInstance().getCurrentAutomata().addTransition(newTransition);
-                    buildTransitionTable(Model.getInstance().getCurrentAutomata());
+                    String[] tokens = data.getSymbols().split(",", -1);
+                    List<String> processedTokens = new ArrayList<>();
+                    for (String token : tokens) {
+                        String trimmed = token.trim();
+                        if (trimmed.isEmpty()) {
+                            processedTokens.add("ε");
+                        } else if (trimmed.length() == 1) {
+                            processedTokens.add(trimmed);
+                        }
+                    }
+                    if (!processedTokens.isEmpty()) {
+                        Transition newTransition = new Transition(data.getSource(), data.getSymbols(), data.getTarget());
+                        Model.getInstance().getCurrentAutomata().addTransition(newTransition);
+                        buildTransitionTable(Model.getInstance().getCurrentAutomata());
 
-                    Model.getInstance().setUpdateView1(true);
-                    Model.getInstance().setUpdateView3(true);
+                        Model.getInstance().setUpdateView1(true);
+                        Model.getInstance().setUpdateView3(true);
+                    }
                 }
             });
         });

@@ -23,10 +23,7 @@ import sk.ukf.autviz.Utils.DirectedLoop;
 
 import java.net.URL;
 import java.sql.SQLOutput;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class View1Controller implements Initializable {
 
@@ -319,11 +316,23 @@ public class View1Controller implements Initializable {
             dialog.getEditor().setPromptText("Sem zadaj symboly ...");
             Optional<String> result = dialog.showAndWait();
             result.ifPresent(symbols -> {
-                Transition newTransition = new Transition(source, symbols, target);
-                Model.getInstance().getCurrentAutomata().addTransition(newTransition);
-                Model.getInstance().setUpdateView2(true);
-                Model.getInstance().setUpdateView3(true);
-                updateVisualization();
+                String[] tokens = symbols.split(",", -1);
+                List<String> processedTokens = new ArrayList<>();
+                for (String token : tokens) {
+                    String trimmed = token.trim();
+                    if (trimmed.isEmpty()) {
+                        processedTokens.add("ε");
+                    } else if (trimmed.length() == 1) {
+                        processedTokens.add(trimmed);
+                    }
+                }
+                if (!processedTokens.isEmpty()) {
+                    Transition newTransition = new Transition(source, symbols, target);
+                    Model.getInstance().getCurrentAutomata().addTransition(newTransition);
+                    Model.getInstance().setUpdateView2(true);
+                    Model.getInstance().setUpdateView3(true);
+                    updateVisualization();
+                }
             });
             StateCellData sourceData = Model.getInstance().getStateMapping().get(selectedEdgeSource);
             if (sourceData != null) {

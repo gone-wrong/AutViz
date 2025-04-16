@@ -302,12 +302,24 @@ public class View3Controller implements Initializable {
             Optional<EdgeData> result = dialog.showAndWait();
             result.ifPresent(data -> {
                 if (data.getSource() != null && data.getTarget() != null) {
-                    Transition newTransition = new Transition(data.getSource(), data.getSymbols(), data.getTarget());
-                    Model.getInstance().getCurrentAutomata().addTransition(newTransition);
-                    StateTreeNode newRoot = buildStateTree(Model.getInstance().getCurrentAutomata());
-                    drawStateTree(newRoot);
-                    Model.getInstance().setUpdateView1(true);
-                    Model.getInstance().setUpdateView3(true);
+                    String[] tokens = data.getSymbols().split(",", -1);
+                    List<String> processedTokens = new ArrayList<>();
+                    for (String token : tokens) {
+                        String trimmed = token.trim();
+                        if (trimmed.isEmpty()) {
+                            processedTokens.add("ε");
+                        } else if (trimmed.length() == 1) {
+                            processedTokens.add(trimmed);
+                        }
+                    }
+                    if (!processedTokens.isEmpty()) {
+                        Transition newTransition = new Transition(data.getSource(), data.getSymbols(), data.getTarget());
+                        Model.getInstance().getCurrentAutomata().addTransition(newTransition);
+                        StateTreeNode newRoot = buildStateTree(Model.getInstance().getCurrentAutomata());
+                        drawStateTree(newRoot);
+                        Model.getInstance().setUpdateView1(true);
+                        Model.getInstance().setUpdateView2(true);
+                    }
                 }
             });
         });
