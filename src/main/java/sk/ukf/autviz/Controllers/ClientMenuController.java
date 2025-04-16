@@ -97,7 +97,8 @@ public class ClientMenuController implements Initializable {
 
     private void onSpracovat() {
         String word = slovoField.getText().trim();
-        if (!word.isEmpty() && isWordValid(word)) {
+        if (!word.isEmpty() && isWordValid(word)
+                && !Model.getInstance().getCurrentAutomata().getStates().stream().filter(State::isStateBegin).toList().isEmpty()) {
             Model.getInstance().getViewFactory().getClientSelectedViewProperty().set("View1");
             Model.getInstance().setVizMode(true);
             znakSlovoHBox.setVisible(true);
@@ -111,7 +112,7 @@ public class ClientMenuController implements Initializable {
 
             startWordVisualization(word);
         } else {
-            System.out.println("Entered word is empty or contains invalid symbols.");
+            System.out.println("invalid word or automata.");
         }
     }
 

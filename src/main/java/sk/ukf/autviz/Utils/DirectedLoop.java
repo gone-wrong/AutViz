@@ -32,6 +32,6 @@ public class DirectedLoop extends AbstractEdge {
 
     @Override
     public DirectedLoopGraphic getGraphic(com.fxgraph.graph.Graph graph) {
-        return new DirectedLoopGraphic(graph, this, textProperty);
+        return new DirectedLoopGraphic(graph, this);
     }
 }

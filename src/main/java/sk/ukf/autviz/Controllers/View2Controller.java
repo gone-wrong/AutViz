@@ -7,7 +7,6 @@ import javafx.scene.Node;
 
 import java.util.*;
 
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -27,8 +26,6 @@ import java.util.stream.Collectors;
 public class View2Controller implements Initializable {
 
     private static final double COLUMN_PREF_WIDTH = 120;
-    private static final double FIXED_CELL_SIZE = 31;
-    private static final double HEADER_HEIGHT = 50;
 
     public AnchorPane view2_parent;
     public AnchorPane table_region;
@@ -120,7 +117,6 @@ private void buildTransitionTable(Automata automata) {
             super.commitEdit(newValue);
             TransitionRow row = getTableRow().getItem();
             row.getSource().nameProperty().set(newValue);
-            getTableView().refresh();
         }
 
         @Override
@@ -141,7 +137,6 @@ private void buildTransitionTable(Automata automata) {
         String newValue = event.getNewValue();
         newValue = newValue.replace("► ", "").replace(" !", "").trim();
         row.getSource().nameProperty().set(newValue);
-        transition_table.refresh();
     });
 
     TableColumn<TransitionRow, String> symbolCol = new TableColumn<>("Symboly");
@@ -153,7 +148,6 @@ private void buildTransitionTable(Automata automata) {
         String newValue = event.getNewValue();
         newValue = newValue.trim();
         row.getTransition().setSymbols(newValue);
-        transition_table.refresh();
     });
 
     TableColumn<TransitionRow, String> destinationCol = new TableColumn<>("Destination");
@@ -204,7 +198,6 @@ private void buildTransitionTable(Automata automata) {
             super.commitEdit(newValue);
             TransitionRow row = getTableRow().getItem();
             row.getDestination().nameProperty().set(newValue);
-            getTableView().refresh();
         }
 
         @Override
@@ -224,7 +217,6 @@ private void buildTransitionTable(Automata automata) {
         String newValue = event.getNewValue();
         newValue = newValue.replace("► ", "").replace(" !", "").trim();
         row.getDestination().nameProperty().set(newValue);
-        transition_table.refresh();
     });
 
     TableColumn<TransitionRow, Void> deleteColumn = new TableColumn<>("");

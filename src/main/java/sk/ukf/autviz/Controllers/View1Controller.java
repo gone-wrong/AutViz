@@ -4,7 +4,6 @@ package sk.ukf.autviz.Controllers;
 import com.fxgraph.cells.AbstractCell;
 import com.fxgraph.graph.Graph;
 import com.fxgraph.graph.ICell;
-import javafx.application.Platform;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.Alert;
@@ -22,7 +21,6 @@ import sk.ukf.autviz.Utils.DirectedEdge;
 import sk.ukf.autviz.Utils.DirectedLoop;
 
 import java.net.URL;
-import java.sql.SQLOutput;
 import java.util.*;
 
 public class View1Controller implements Initializable {
@@ -37,8 +35,6 @@ public class View1Controller implements Initializable {
 
     private Graph graph;
     private com.fxgraph.graph.Model graphModel; // model z FXGraph
-
-    private String newStateName = "";
 
     private State selectedEdgeSource = null;
 

@@ -60,6 +60,12 @@ public class Model {
     }
 
     public void setVizMode(boolean vizMode) {
+        if(vizMode) {
+            setEditMode(false);
+            setDeleteStateMode(false);
+            setDeleteEdgeMode(false);
+            setAddEdgeMode(false);
+        }
         this.vizMode.set(vizMode);
     }
 

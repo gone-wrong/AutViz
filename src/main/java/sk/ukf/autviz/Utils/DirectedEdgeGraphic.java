@@ -10,7 +10,6 @@ import javafx.scene.Group;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
-import javafx.scene.shape.Circle; // Debug
 import javafx.scene.shape.CubicCurve;
 import javafx.scene.shape.Line;
 import javafx.scene.shape.Rectangle;
@@ -183,16 +182,6 @@ public class DirectedEdgeGraphic extends Region {
             curve.setFill(Color.TRANSPARENT);
 
             group.getChildren().add(curve);
-//            Debug
-//            Circle controlMarker1 = new Circle(4, Color.RED);
-//            Circle controlMarker2 = new Circle(4, Color.RED);
-//
-//            controlMarker1.centerXProperty().bind(curve.controlX1Property());
-//            controlMarker1.centerYProperty().bind(curve.controlY1Property());
-//            controlMarker2.centerXProperty().bind(curve.controlX2Property());
-//            controlMarker2.centerYProperty().bind(curve.controlY2Property());
-//
-//            group.getChildren().addAll(controlMarker1, controlMarker2);
 
             arrowLine1.endXProperty().bind(curve.endXProperty());
             arrowLine1.endYProperty().bind(curve.endYProperty());
@@ -248,7 +237,7 @@ public class DirectedEdgeGraphic extends Region {
             group.getChildren().add(text);
 
             editRect.setFill(Color.TRANSPARENT);
-            // debugging
+
             DoubleBinding edgeLength = Bindings.createDoubleBinding(() -> {
                 double dxE = targetX.get() - sourceX.get();
                 double dyE = targetY.get() - sourceY.get();

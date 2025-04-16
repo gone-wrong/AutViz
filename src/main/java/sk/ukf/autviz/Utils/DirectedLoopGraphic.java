@@ -35,7 +35,7 @@ public class DirectedLoopGraphic extends Region {
     private final double offsetAngle = Math.toRadians(30);
     private final double controlOffset = 40; // posun nahor pre kontrolné body
 
-    public DirectedLoopGraphic(Graph graph, DirectedLoop edge, StringProperty textProperty) {
+    public DirectedLoopGraphic(Graph graph, DirectedLoop edge) {
         group = new Group();
         curve = new CubicCurve();
         arrowLine1 = new Line();
