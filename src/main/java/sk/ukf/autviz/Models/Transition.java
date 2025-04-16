@@ -16,7 +16,6 @@ public class Transition {
     private final ReadOnlyStringWrapper characterWrapper = new ReadOnlyStringWrapper();
 
     private final BooleanProperty hasOpposite = new SimpleBooleanProperty(false);
-    private final BooleanProperty isActive = new SimpleBooleanProperty(false);
 
     public Transition(State stateSource, String symbol, State stateDestination) {
         this.stateSource = stateSource;
@@ -25,26 +24,22 @@ public class Transition {
             setSymbols(symbol);
         } else {
             String processedSymbol = processSymbol(symbol);
-            symbols.add(processedSymbol);
+            if (!processedSymbol.isEmpty()) {
+                symbols.add(processedSymbol);
+            }
             updateCharacterWrapper();
         }
     }
 
-    public boolean isActive() {
-        return isActive.get();
-    }
-
-    public void setActive(boolean active) {
-        isActive.set(active);
-    }
-
-    public BooleanProperty isActiveProperty() {
-        return isActive;
-    }
-
     private String processSymbol(String sym) {
         String trimmed = sym.trim();
-        return trimmed.isEmpty() ? "ε" : trimmed;
+        if (trimmed.isEmpty()) {
+            return "ε";
+        }
+        if (trimmed.length() > 1) {
+            return "";
+        }
+        return trimmed;
     }
 
     public State getStateDestination() {
@@ -72,17 +67,14 @@ public class Transition {
         updateCharacterWrapper();
     }
 
-    public void removeSymbol(String symbol) {
-        String processedSymbol = processSymbol(symbol);
-        symbols.remove(processedSymbol);
-        updateCharacterWrapper();
-    }
-
     public void setSymbols(String symbolsStr) {
         symbols.clear();
         String[] tokens = symbolsStr.split(",", -1);
         for (String token : tokens) {
-            symbols.add(processSymbol(token));
+            String processed = processSymbol(token);
+            if (!processed.isEmpty()) {
+                symbols.add(processed);
+            }
         }
         updateCharacterWrapper();
     }
@@ -97,10 +89,6 @@ public class Transition {
 
     public BooleanProperty hasOppositeProperty() {
         return hasOpposite;
-    }
-
-    public boolean isHasOpposite() {
-        return hasOpposite.get();
     }
 
     public void setHasOpposite(boolean value) {

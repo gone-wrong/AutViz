@@ -117,8 +117,6 @@ public class View1Controller implements Initializable {
 
         graph.endUpdate();
 
-        // graph.layout(new AbegoTreeLayout(200, 150, org.abego.treelayout.Configuration.Location.Top));
-
         BorderPane pane = new BorderPane(graph.getCanvas());
         AnchorPane.setTopAnchor(pane, 0.0);
         AnchorPane.setBottomAnchor(pane, 0.0);
@@ -199,13 +197,18 @@ public class View1Controller implements Initializable {
             // update the stored properties.
             cellData.setLayoutX(currentX);
             cellData.setLayoutY(currentY);
-//            System.out.println("Updated " + entry.getKey().getName()
-//                    + " -> X: " + currentX
-//                    + ", Y: " + currentY);
         }
     }
 
     private void addButtonListeners() {
+        Model.getInstance().vizModeProperty().addListener((observable, oldValue, newValue) -> {
+            delete_edge_button.setDisable(newValue);
+            add_edge_button.setDisable(newValue);
+            edit_mode_button.setDisable(newValue);
+            delete_state_button.setDisable(newValue);
+            add_state_button.setDisable(newValue);
+        });
+
         delete_edge_button.setOnAction(event -> {
             boolean currentMode = Model.getInstance().isDeleteEdgeMode();
             boolean newMode = !currentMode;

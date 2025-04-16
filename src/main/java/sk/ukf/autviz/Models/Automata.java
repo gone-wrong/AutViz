@@ -125,9 +125,9 @@ public class Automata {
         StringBuilder automataSaveFile = new StringBuilder();
         automataSaveFile.append("A: ");
         for(String alphabet: this.getAlphabet()) {
-            automataSaveFile.append(alphabet + "; ");
+            automataSaveFile.append(alphabet).append("; ");
         }
-        automataSaveFile.append(System.getProperty("line.separator"));
+        automataSaveFile.append(System.lineSeparator());
         automataSaveFile.append("S: ");
         for(State state: this.getStates()) {
             automataSaveFile.append(state.getName());
@@ -135,10 +135,10 @@ public class Automata {
             if(state.isStateEnd()) automataSaveFile.append("-F");
             automataSaveFile.append("; ");
         }
-        automataSaveFile.append(System.getProperty("line.separator"));
+        automataSaveFile.append(System.lineSeparator());
         automataSaveFile.append("T: ");
         for(Transition transition: this.getTransitions()) {
-            automataSaveFile.append(transition.getStateSource().getName() + "-" + transition.getCharacter() + "-" + transition.getStateDestination().getName() + "; ");
+            automataSaveFile.append(transition.getStateSource().getName()).append("-").append(transition.getCharacter()).append("-").append(transition.getStateDestination().getName()).append("; ");
         }
         return automataSaveFile.toString();
     }

@@ -17,7 +17,6 @@ import javafx.scene.shape.Rectangle;
 import javafx.scene.text.Text;
 import sk.ukf.autviz.Models.Model;
 
-import java.util.Collections;
 import java.util.Optional;
 
 public class DirectedLoopGraphic extends Region {
@@ -43,6 +42,14 @@ public class DirectedLoopGraphic extends Region {
         arrowLine2 = new Line();
         text = new Text();
         editRect = new Rectangle();
+
+        Model.getInstance().editModeProperty().addListener((obs, oldVal, newVal) -> {
+            if(newVal) {
+                editRect.setStroke(Color.RED);
+            } else {
+                editRect.setStroke(Color.TRANSPARENT);
+            }
+        });
 
         // stred uzla (pre self-loop je zdroj = cieľ)
         final DoubleBinding centerX = edge.getSource().getXAnchor(graph, edge);
@@ -147,8 +154,6 @@ public class DirectedLoopGraphic extends Region {
         final double EDIT_EXTRA = 10; // extra šírka
         final double EDIT_HEIGHT = 20;
         editRect.setFill(Color.TRANSPARENT);
-        // Debug
-        editRect.setStroke(Color.RED);
 
         DoubleBinding controlDistance = Bindings.createDoubleBinding(() ->
                         Math.hypot(curve.getControlX2() - curve.getControlX1(), curve.getControlY2() - curve.getControlY1()),

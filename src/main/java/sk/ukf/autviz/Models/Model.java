@@ -13,6 +13,7 @@ public class Model {
     private Automata currentAutomata;
     private Map<State, StateCellData> stateMapping = new HashMap<>();
 
+    private final BooleanProperty vizMode = new SimpleBooleanProperty(false);
     private final BooleanProperty editMode = new SimpleBooleanProperty(false);
     private final BooleanProperty deleteStateMode = new SimpleBooleanProperty(false);
     private final BooleanProperty deleteEdgeMode = new SimpleBooleanProperty(false);
@@ -48,6 +49,18 @@ public class Model {
 
     public ViewFactory getViewFactory() {
         return viewFactory;
+    }
+
+    public BooleanProperty vizModeProperty() {
+        return vizMode;
+    }
+
+    public boolean isVizMode() {
+        return vizMode.get();
+    }
+
+    public void setVizMode(boolean vizMode) {
+        this.vizMode.set(vizMode);
     }
 
     public BooleanProperty editModeProperty() {

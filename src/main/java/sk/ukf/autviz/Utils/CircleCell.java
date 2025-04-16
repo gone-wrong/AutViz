@@ -99,6 +99,7 @@ public class CircleCell extends AbstractCell {
 
                 CheckBox beginCheck = new CheckBox("Začiatočný");
                 beginCheck.setSelected(state.isStateBegin());
+                boolean originalBegin = state.isStateBegin();
                 CheckBox endCheck = new CheckBox("Koncový");
                 endCheck.setSelected(state.isStateEnd());
 
@@ -132,6 +133,9 @@ public class CircleCell extends AbstractCell {
                     state.setStateName(newName);
                     state.setStateBegin(beginCheck.isSelected());
                     state.setStateEnd(endCheck.isSelected());
+                    if(originalBegin != beginCheck.isSelected()) {
+                        Model.getInstance().setUpdateView3(true);
+                    }
                 }
             }
         });

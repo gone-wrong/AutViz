@@ -49,6 +49,14 @@ public class DirectedEdgeGraphic extends Region {
         edge.getTransition().hasOppositeProperty().addListener(
                 (obs, oldVal, newVal) -> Platform.runLater(this::rebuildGraphic));
 
+        Model.getInstance().editModeProperty().addListener((obs, oldVal, newVal) -> {
+            if(newVal) {
+                editRect.setStroke(Color.RED);
+            } else {
+                editRect.setStroke(Color.TRANSPARENT);
+            }
+        });
+
         editRect.setOnMouseClicked(event -> {
             if (Model.getInstance().isEditMode()) {
                 TextInputDialog dialog = new TextInputDialog(edge.getTransition().getCharacter());
@@ -241,7 +249,6 @@ public class DirectedEdgeGraphic extends Region {
 
             editRect.setFill(Color.TRANSPARENT);
             // debugging
-            editRect.setStroke(Color.RED);
             DoubleBinding edgeLength = Bindings.createDoubleBinding(() -> {
                 double dxE = targetX.get() - sourceX.get();
                 double dyE = targetY.get() - sourceY.get();
@@ -342,7 +349,6 @@ public class DirectedEdgeGraphic extends Region {
             final double EDIT_RECT_WIDTH = 20;
             editRect.setFill(Color.TRANSPARENT);
             // debugging
-            editRect.setStroke(Color.RED);
             editRect.setWidth(EDIT_RECT_WIDTH);
             // binding pre výpočet dĺžky hrany:
             DoubleBinding edgeLength = Bindings.createDoubleBinding(() -> {

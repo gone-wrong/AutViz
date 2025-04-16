@@ -5,7 +5,6 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.HBox;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.stage.FileChooser;
 import javafx.util.Pair;
@@ -97,6 +96,9 @@ public class ClientMenuController implements Initializable {
     }
 
     private void onSpracovat() {
+        Model.getInstance().getViewFactory().getClientSelectedViewProperty().set("View1");
+        Model.getInstance().setVizMode(true);
+
         String word = slovoField.getText().trim();
         if (!word.isEmpty() && isWordValid(word)) {
             znakSlovoHBox.setVisible(true);
@@ -125,6 +127,7 @@ public class ClientMenuController implements Initializable {
     }
 
     private void onCancel() {
+        Model.getInstance().setVizMode(false);
         znakSlovoHBox.setVisible(false);
         view1_btn.setDisable(false);
         view2_btn.setDisable(false);
@@ -293,6 +296,5 @@ public class ClientMenuController implements Initializable {
         Model.getInstance().setUpdateView1(true);
         Model.getInstance().setUpdateView2(true);
         Model.getInstance().setUpdateView3(true);
-
     }
 }

@@ -1,5 +1,6 @@
 package sk.ukf.autviz.Controllers;
 
+import javafx.beans.value.ChangeListener;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.layout.GridPane;
 import javafx.scene.Node;
@@ -79,20 +80,40 @@ private void buildTransitionTable(Automata automata) {
     sourceCol.setPrefWidth(COLUMN_PREF_WIDTH);
 
     sourceCol.setCellFactory(col -> new TextFieldTableCell<TransitionRow, String>(new DefaultStringConverter()) {
+        private TransitionRow currentRow;
+        private final ChangeListener<Boolean> beginEndListener = (obs, oldVal, newVal) -> updateText();
+
         @Override
         public void updateItem(String item, boolean empty) {
             super.updateItem(item, empty);
-            if (!isEditing()) {
-                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    TransitionRow row = getTableRow().getItem();
-                    String rawName = row.getSource().nameProperty().get();
-                    setText(decorateStateName(rawName,
-                            row.getSource().stateBeginProperty().get(),
-                            row.getSource().stateEndProperty().get()));
+            if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                if (currentRow != null) {
+                    currentRow.getSource().stateBeginProperty().removeListener(beginEndListener);
+                    currentRow.getSource().stateEndProperty().removeListener(beginEndListener);
+                    currentRow = null;
                 }
+                setText(null);
+            } else {
+                TransitionRow row = getTableRow().getItem();
+                if (currentRow != row) {
+                    if (currentRow != null) {
+                        currentRow.getSource().stateBeginProperty().removeListener(beginEndListener);
+                        currentRow.getSource().stateEndProperty().removeListener(beginEndListener);
+                    }
+                    currentRow = row;
+                    currentRow.getSource().stateBeginProperty().addListener(beginEndListener);
+                    currentRow.getSource().stateEndProperty().addListener(beginEndListener);
+                }
+                updateText();
+            }
+        }
+
+        private void updateText() {
+            if (currentRow != null) {
+                String rawName = currentRow.getSource().nameProperty().get();
+                setText(decorateStateName(rawName,
+                        currentRow.getSource().stateBeginProperty().get(),
+                        currentRow.getSource().stateEndProperty().get()));
             }
         }
         @Override
@@ -141,20 +162,41 @@ private void buildTransitionTable(Automata automata) {
     destinationCol.setCellValueFactory(cellData -> cellData.getValue().destinationProperty());
     destinationCol.setPrefWidth(COLUMN_PREF_WIDTH);
     destinationCol.setCellFactory(col -> new TextFieldTableCell<TransitionRow, String>(new DefaultStringConverter()) {
+        private TransitionRow currentRow;
+        private final ChangeListener<Boolean> beginEndListener = (obs, oldVal, newVal) -> updateText();
+
         @Override
         public void updateItem(String item, boolean empty) {
             super.updateItem(item, empty);
-            if (!isEditing()) {
-                if (empty || getTableRow() == null || getTableRow().getItem() == null) {
-                    setText(null);
-                    setGraphic(null);
-                } else {
-                    TransitionRow row = getTableRow().getItem();
-                    String rawName = row.getDestination().nameProperty().get();
-                    setText(decorateStateName(rawName,
-                            row.getDestination().stateBeginProperty().get(),
-                            row.getDestination().stateEndProperty().get()));
+            if (empty || getTableRow() == null || getTableRow().getItem() == null) {
+                if (currentRow != null) {
+                    currentRow.getSource().stateBeginProperty().removeListener(beginEndListener);
+                    currentRow.getSource().stateEndProperty().removeListener(beginEndListener);
+                    currentRow = null;
                 }
+                setText(null);
+            } else {
+                TransitionRow row = getTableRow().getItem();
+                if (currentRow != row) {
+                    if (currentRow != null) {
+                        currentRow.getSource().stateBeginProperty().removeListener(beginEndListener);
+                        currentRow.getSource().stateEndProperty().removeListener(beginEndListener);
+                    }
+                    currentRow = row;
+                    currentRow.getSource().stateBeginProperty().addListener(beginEndListener);
+                    currentRow.getSource().stateEndProperty().addListener(beginEndListener);
+                }
+                updateText();
+            }
+        }
+
+        // Method to update the cell text based on the current state of the source.
+        private void updateText() {
+            if (currentRow != null) {
+                String rawName = currentRow.getSource().nameProperty().get();
+                setText(decorateStateName(rawName,
+                        currentRow.getSource().stateBeginProperty().get(),
+                        currentRow.getSource().stateEndProperty().get()));
             }
         }
 
