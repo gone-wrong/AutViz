@@ -195,33 +195,53 @@ public class Model {
     private Automata createSampleAutomaton() {
         Automata a = new Automata();
 
-        // vytvorenie 5 stavov
-        State q0 = new State("q0");
-        State q1 = new State("q1");
-        State q2 = new State("qqqqq2"); // Begin a End
-        State q3 = new State("q3");
-        State q4 = new State("q4"); // End
+//        State q0 = new State("q0");
+//        State q1 = new State("q1");
+//        State q2 = new State("qqqqq2"); // Begin a End
+//        State q3 = new State("q3");
+//        State q4 = new State("q4"); // End
+//
+//        // nastavenie príznakov:
+//        q2.setStateBegin(true);
+//        q2.setStateEnd(true);
+//        q4.setStateEnd(true);
+//
+//        a.addState(q0);
+//        a.addState(q1);
+//        a.addState(q4);
+//        a.addState(q3);
+//        a.addState(q2);
+//
+//        a.addTransition(new Transition(q1, "b", q0));
+//        a.addTransition(new Transition(q2, "a", q0));
+//        a.addTransition(new Transition(q0, "b", q1));
+//        a.addTransition(new Transition(q0, "b", q3));
+//        a.addTransition(new Transition(q0, "a", q3));
+//        a.addTransition(new Transition(q1, "a", q3));
+//        a.addTransition(new Transition(q1, "b", q1));
+//        a.addTransition(new Transition(q3, "b", q4));
+//        a.addTransition(new Transition(q4, "a", q2));
 
-        // nastavenie príznakov:
-        q2.setStateBegin(true);
-        q2.setStateEnd(true);
-        q4.setStateEnd(true);
-
-        a.addState(q0);
-        a.addState(q1);
-        a.addState(q4);
-        a.addState(q3);
-        a.addState(q2);
-
-        a.addTransition(new Transition(q1, "b", q0));
-        a.addTransition(new Transition(q2, "a", q0));
-        a.addTransition(new Transition(q0, "b", q1));
-        a.addTransition(new Transition(q0, "b", q3));
-        a.addTransition(new Transition(q0, "a", q3));
-        a.addTransition(new Transition(q1, "a", q3));
-        a.addTransition(new Transition(q1, "b", q1));
-        a.addTransition(new Transition(q3, "b", q4));
-        a.addTransition(new Transition(q4, "a", q2));
+        State s0 = new State("s0"), s1 = new State("s1"), s2 = new State("s2"),
+                s3 = new State("s3"), s4 = new State("s4");
+        s0.setStateBegin(true);
+        s0.setStateEnd(true);
+        s2.setStateEnd(true);
+        s4.setStateEnd(true);
+        a.addState(s0);
+        a.addState(s1);
+        a.addState(s2);
+        a.addState(s3);
+        a.addState(s4);
+        a.addTransition(new Transition(s0, "a", s0));
+        a.addTransition(new Transition(s0, "b", s1));
+        a.addTransition(new Transition(s1, "b", s3));
+        a.addTransition(new Transition(s1, "a", s2));
+        a.addTransition(new Transition(s2, "a", s2));
+        a.addTransition(new Transition(s2, "b", s4));
+        a.addTransition(new Transition(s3, "a", s2));
+        a.addTransition(new Transition(s3, "b", s3));
+        a.addTransition(new Transition(s4, "a,b", s4));
 
         return a;
     }

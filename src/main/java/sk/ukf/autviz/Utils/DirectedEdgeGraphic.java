@@ -45,13 +45,23 @@ public class DirectedEdgeGraphic extends Region {
         editRect.setWidth(30);
         rebuildGraphic();
 
+        if(Model.getInstance().isDeleteEdgeMode() || Model.getInstance().isEditMode()) editRect.setStroke(Color.RED);
+
         edge.getTransition().hasOppositeProperty().addListener(
                 (obs, oldVal, newVal) -> Platform.runLater(this::rebuildGraphic));
 
         Model.getInstance().editModeProperty().addListener((obs, oldVal, newVal) -> {
             if(newVal) {
                 editRect.setStroke(Color.RED);
-            } else {
+            } else if (!Model.getInstance().isDeleteEdgeMode()) {
+                editRect.setStroke(Color.TRANSPARENT);
+            }
+        });
+
+        Model.getInstance().deleteEdgeModeProperty().addListener((obs, oldVal, newVal) -> {
+            if(newVal) {
+                editRect.setStroke(Color.RED);
+            } else if (!Model.getInstance().isEditMode()) {
                 editRect.setStroke(Color.TRANSPARENT);
             }
         });

@@ -51,6 +51,14 @@ public class DirectedLoopGraphic extends Region {
             }
         });
 
+        Model.getInstance().deleteEdgeModeProperty().addListener((obs, oldVal, newVal) -> {
+            if(newVal) {
+                editRect.setStroke(Color.RED);
+            } else {
+                editRect.setStroke(Color.TRANSPARENT);
+            }
+        });
+
         // stred uzla (pre self-loop je zdroj = cieľ)
         final DoubleBinding centerX = edge.getSource().getXAnchor(graph, edge);
         final DoubleBinding centerY = edge.getSource().getYAnchor(graph, edge);
